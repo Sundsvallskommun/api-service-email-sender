@@ -1,0 +1,17 @@
+version: "3"
+services:
+  email-sender:
+    container_name: ms-email-sender
+    image: 'ms-email-sender:latest'
+    network_mode: bridge
+    restart: always
+    ports:
+      - "9020:8080"
+    environment:
+      - JAVA_OPTS=-server -Dfile.encoding=UTF-8 -Xms128m -Xmx256m
+      - SPRING_PROFILES_ACTIVE=<profile>
+      - SMTP_HOST=<smtp host>
+      - SMTP_PORT=<smtp port>
+      - SMTP_USERNAME=<smtp username>
+      - SMTP_PASSWORD=<smtp password>
+
