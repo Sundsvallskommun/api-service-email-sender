@@ -1,0 +1,29 @@
+version: '3'
+services:
+  ms-email-sender-sandbox:
+    container_name: ms-email-sender-sandbox
+    image: 'ms-email-sender:latest'
+    network_mode: bridge
+    restart: always
+    build:
+      context: ../../
+      dockerfile: ./src/docker/Dockerfile
+    depends_on:
+      - ms-email-sender-sandbox-smtp-server
+    links:
+      - ms-email-sender-sandbox-smtp-server:smtp-server
+    ports:
+      - '9051:8080'
+    environment:
+      - JAVA_OPTS=-server -Dfile.encoding=UTF-8 -Xms128m -Xmx256m
+      - SPRING_PROFILES_ACTIVE=sandbox
+      - SMTP_HOST=smtp-server
+      - SMTP_PORT=25
+
+  ms-email-sender-sandbox-smtp-server:
+    container_name: ms-email-sender-sandbox-smtp-server
+    image: rnwood/smtp4dev:prerelease
+    network_mode: bridge
+    restart: always
+    expose:
+      - '25'
