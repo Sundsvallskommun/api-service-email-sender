@@ -1,4 +1,4 @@
-package se.sundsvall.emailsender.api.domain;
+package se.sundsvall.emailsender.api.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("junit")
-class EmailRequestValidationTest {
+class EmailRequestValidationTests {
 
     private Validator validator;
 
@@ -91,20 +91,20 @@ class EmailRequestValidationTest {
         assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must be a well-formed email address");
     }
 
-    private EmailRequest createEmailRequest() {
+    private SendEmailRequest createEmailRequest() {
         return createEmailRequest(null);
     }
 
-    private EmailRequest createEmailRequest(final Consumer<EmailRequest> modifier) {
+    private SendEmailRequest createEmailRequest(final Consumer<SendEmailRequest> modifier) {
         var html = Base64.getEncoder().encodeToString("<p>html</p>".getBytes(StandardCharsets.UTF_8));
 
-        var attachment = EmailRequest.Attachment.builder()
+        var attachment = SendEmailRequest.Attachment.builder()
             .withContent("aGVsbG8gd29ybGQK")
             .withContentType("text/plain")
             .withName("test.txt")
             .build();
 
-        var request = EmailRequest.builder()
+        var request = SendEmailRequest.builder()
             .withEmailAddress("some.other.email@someotherhost.com")
             .withSubject("someSubject")
             .withMessage("someMessage")

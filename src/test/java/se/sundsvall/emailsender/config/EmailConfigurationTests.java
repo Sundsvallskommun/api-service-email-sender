@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("junit")
 @SpringBootTest(classes = EmailConfiguration.class)
-class EmailConfigurationTest {
+class EmailConfigurationTests {
 
     @Autowired
     @Qualifier("integration.email.mailsender")

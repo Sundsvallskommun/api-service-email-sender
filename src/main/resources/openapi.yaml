@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: "1.0"
+  version: '@project.version@'
 servers:
 - url: http://localhost:8080
   description: Generated server url
@@ -13,24 +13,24 @@ paths:
   /send/email:
     post:
       tags:
-      - email-controller
+      - email-resource
       summary: Send an Email
       operationId: sendMail
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmailRequest'
+              $ref: '#/components/schemas/SendEmailRequest'
         required: true
       responses:
-        "200":
-          description: Successful Operation
         "400":
           description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful Operation
         "500":
           description: Internal Server Error
           content:
@@ -71,7 +71,7 @@ components:
           description: The attachment content type
           example: text/plain
       description: Attachments
-    EmailRequest:
+    SendEmailRequest:
       required:
       - emailAddress
       - senderEmail

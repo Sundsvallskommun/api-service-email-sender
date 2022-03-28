@@ -26,11 +26,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.ActiveProfiles;
 
-import se.sundsvall.emailsender.api.domain.EmailRequest;
+import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 @ActiveProfiles("junit")
 @ExtendWith(MockitoExtension.class)
-class EmailServiceTest {
+class EmailServiceTests {
 
     private final static String EMAIL_SENDER = "sender@sender.com";
     private final static String EMAIL_RECEIVER = "receiver@receiver.com";
@@ -66,7 +66,7 @@ class EmailServiceTest {
     @Test
     void sendEmail_withinvalidAttachment_returns() throws MessagingException {
         String invalidBase64 = "not a base 64 string";
-        var invalidAttachment = EmailRequest.Attachment.builder()
+        var invalidAttachment = SendEmailRequest.Attachment.builder()
             .withContent(invalidBase64)
             .withName("attachment")
             .withContentType("image/jpg")
@@ -91,13 +91,13 @@ class EmailServiceTest {
         verify(helper, never()).addAttachment(anyString(), any(DataSource.class));
     }
 
-    private EmailRequest validEmailRequest(Consumer<EmailRequest> modifier) {
-        var attachment = EmailRequest.Attachment.builder()
+    private SendEmailRequest validEmailRequest(final Consumer<SendEmailRequest> modifier) {
+        var attachment = SendEmailRequest.Attachment.builder()
             .withContent(Base64.getEncoder().encodeToString("content".getBytes()))
             .withName("attachment")
             .withContentType("image/jpg")
             .build();
-        var request = EmailRequest.builder()
+        var request = SendEmailRequest.builder()
             .withEmailAddress(EMAIL_RECEIVER)
             .withSubject("subject")
             .withMessage("message")

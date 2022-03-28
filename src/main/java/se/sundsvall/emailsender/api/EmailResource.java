@@ -1,4 +1,4 @@
-package se.sundsvall.emailsender.api.controller;
+package se.sundsvall.emailsender.api;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.problem.Problem;
 
-import se.sundsvall.emailsender.api.domain.EmailRequest;
+import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.service.EmailService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,11 +19,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-public class EmailController {
+class EmailResource {
 
     private final EmailService service;
 
-    public EmailController(EmailService service) {
+    EmailResource(final EmailService service) {
         this.service = service;
     }
 
@@ -46,7 +46,7 @@ public class EmailController {
         )
     })
     @PostMapping("/send/email")
-    public ResponseEntity<Void> sendMail(@Valid @RequestBody EmailRequest request) throws MessagingException {
+    ResponseEntity<Void> sendMail(@Valid @RequestBody final SendEmailRequest request) throws MessagingException {
         service.sendMail(request);
         return ResponseEntity.ok(null);
     }

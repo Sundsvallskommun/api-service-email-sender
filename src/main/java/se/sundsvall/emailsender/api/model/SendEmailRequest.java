@@ -1,4 +1,4 @@
-package se.sundsvall.emailsender.api.domain;
+package se.sundsvall.emailsender.api.model;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class EmailRequest {
+public class SendEmailRequest {
     
 	@Schema(description = "Recipient e-mail address", example = "recipient@recipient.se" )
     @NotBlank
