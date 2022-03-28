@@ -13,7 +13,7 @@ class EmailConfiguration {
 
     private final EmailProperties props;
 
-    EmailConfiguration(EmailProperties props) {
+    EmailConfiguration(final EmailProperties props) {
         this.props = props;
     }
 

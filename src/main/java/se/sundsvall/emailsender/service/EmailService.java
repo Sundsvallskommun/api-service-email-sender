@@ -2,9 +2,8 @@ package se.sundsvall.emailsender.service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -16,7 +15,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import se.sundsvall.emailsender.api.domain.EmailRequest;
+import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,27 +29,28 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public boolean sendMail(EmailRequest request) throws MessagingException {
-        MimeMessageHelper helper = new MimeMessageHelper(mailSender.createMimeMessage(), true, StandardCharsets.UTF_8.name());
-        MimeMessage email = createMessage(helper, request);
+    public boolean sendMail(final SendEmailRequest request) throws MessagingException {
+        var helper = new MimeMessageHelper(mailSender.createMimeMessage(), true, StandardCharsets.UTF_8.name());
+        var email = createMessage(helper, request);
+
         mailSender.send(email);
 
         return true;
     }
 
-    MimeMessage createMessage(MimeMessageHelper helper, EmailRequest request) throws MessagingException {
+    MimeMessage createMessage(final MimeMessageHelper helper, final SendEmailRequest request) throws MessagingException {
         helper.setFrom(String.format("%s <%s>", request.getSenderName(), request.getSenderEmail()));
         helper.setTo(request.getEmailAddress());
         helper.setSubject(request.getSubject());
 
         if (StringUtils.isBlank(request.getHtmlMessage())) {
             helper.setText(request.getMessage());
-        } else if (validBase64String(request.getHtmlMessage())) {
+        } else if (isValidBase64String(request.getHtmlMessage())) {
             helper.setText(request.getMessage(), new String(Base64.getDecoder().decode(request.getHtmlMessage())));
         }
 
-        for (var attachment : getOrEmptyAttatchment(request.getAttachments())) {
-            if (!validBase64String(attachment.getContent())) {
+        for (var attachment : Optional.ofNullable(request.getAttachments()).orElse(List.of())) {
+            if (!isValidBase64String(attachment.getContent())) {
                 continue;
             }
             byte[] content = Base64.getDecoder().decode(attachment.getContent());
@@ -59,11 +59,7 @@ public class EmailService {
         return helper.getMimeMessage();
     }
 
-    Collection<EmailRequest.Attachment> getOrEmptyAttatchment(List<EmailRequest.Attachment> list) {
-        return list == null ? Collections.emptyList() : list;
-    }
-
-    boolean validBase64String(String content) {
+    boolean isValidBase64String(String content) {
         try {
             Base64.getDecoder().decode(content);
         } catch (IllegalArgumentException e) {

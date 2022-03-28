@@ -1,4 +1,4 @@
-package se.sundsvall.emailsender.api.controller;
+package se.sundsvall.emailsender.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,12 +17,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
-import se.sundsvall.emailsender.api.domain.EmailRequest;
+import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.service.EmailService;
 
 @ActiveProfiles("junit")
 @ExtendWith(MockitoExtension.class)
-class EmailControllerTest {
+class EmailResourceTests {
 
     private final static String EMAIL_SENDER = "sender@sender.com";
     private final static String EMAIL_RECEIVER = "receiver@receiver.com";
@@ -30,31 +30,31 @@ class EmailControllerTest {
     @Mock
     private EmailService mockService;
 
-    private EmailController emailController;
+    private EmailResource emailResource;
 
     @BeforeEach
     public void setUp() {
-        emailController = new EmailController(mockService);
+        emailResource = new EmailResource(mockService);
     }
 
     @Test
     void sendMail_givenValidDto_shouldReturn_200_OK() throws Exception {
-        when(mockService.sendMail(any(EmailRequest.class))).thenReturn(true);
+        when(mockService.sendMail(any(SendEmailRequest.class))).thenReturn(true);
 
-        var result = emailController.sendMail(validEmailRequest());
+        var result = emailResource.sendMail(validEmailRequest());
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        verify(mockService,times(1)).sendMail(any(EmailRequest.class));
+        verify(mockService,times(1)).sendMail(any(SendEmailRequest.class));
     }
 
-    private EmailRequest validEmailRequest() {
-        var attachment = EmailRequest.Attachment.builder()
+    private SendEmailRequest validEmailRequest() {
+        var attachment = SendEmailRequest.Attachment.builder()
             .withContent(Base64.getEncoder().encodeToString("content".getBytes()))
             .withName("attatchment")
             .withContentType("image/jpg")
             .build();
 
-        return EmailRequest.builder()
+        return SendEmailRequest.builder()
             .withEmailAddress(EMAIL_RECEIVER)
             .withSubject("subject")
             .withMessage("message")
