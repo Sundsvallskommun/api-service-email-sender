@@ -7,19 +7,21 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import se.sundsvall.emailsender.api.model.SendEmailRequest;
+
 @ActiveProfiles("junit")
 class EmailRequestTests {
 
     @Test
     void testGettersAndSetters() {
-        var request = new EmailRequest();
+        var request = new SendEmailRequest();
         request.setSenderName("someSenderName");
         request.setSenderEmail("someSenderEmail");
         request.setEmailAddress("someEmailAddress");
         request.setSubject("someSubject");
         request.setMessage("someMessage");
         request.setHtmlMessage("someHtmlMessage");
-        request.setAttachments(List.of(new EmailRequest.Attachment()));
+        request.setAttachments(List.of(new SendEmailRequest.Attachment()));
 
         assertThat(request.getSenderName()).isEqualTo("someSenderName");
         assertThat(request.getSenderEmail()).isEqualTo("someSenderEmail");
@@ -32,7 +34,7 @@ class EmailRequestTests {
 
     @Test
     void testBuilder() {
-        var request = EmailRequest.builder()
+        var request = SendEmailRequest.builder()
             .withSenderName("someSenderName")
             .withSenderEmail("someSenderEmail")
             .withEmailAddress("someEmailAddress")
@@ -40,7 +42,7 @@ class EmailRequestTests {
             .withMessage("someMessage")
             .withHtmlMessage("someHtmlMessage")
             .withAttachments(List.of(
-                EmailRequest.Attachment.builder()
+                SendEmailRequest.Attachment.builder()
                     .withName("someName")
                     .withContent("someContent")
                     .withContentType("someContentType")

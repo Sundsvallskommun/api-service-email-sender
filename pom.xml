@@ -47,7 +47,7 @@
                 <version>${jacoco-maven-plugin.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/se/sundsvall/emailsender/EmailSenderApplication*</exclude>
+                        <exclude>**/se/sundsvall/emailsender/Application*</exclude>
                         <exclude>**/se/sundsvall/emailsender/config/EmailConfiguration*</exclude>
                     </excludes>
                 </configuration>

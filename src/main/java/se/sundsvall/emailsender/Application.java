@@ -5,9 +5,9 @@ import org.springframework.boot.SpringApplication;
 import se.sundsvall.dept44.ServiceApplication;
 
 @ServiceApplication
-public class EmailSenderApplication {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(EmailSenderApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 }

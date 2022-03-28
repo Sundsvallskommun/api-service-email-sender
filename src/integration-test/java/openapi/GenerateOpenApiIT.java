@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import se.sundsvall.dept44.util.ResourceUtils;
-import se.sundsvall.emailsender.EmailSenderApplication;
+import se.sundsvall.emailsender.Application;
 
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
@@ -23,7 +23,7 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 @ActiveProfiles("junit")
 @SpringBootTest(
     webEnvironment = WebEnvironment.RANDOM_PORT,
-    classes = EmailSenderApplication.class,
+    classes = Application.class,
     properties = {
         "integration.email.hostname=somehost.com",
         "integration.email.port=25",
