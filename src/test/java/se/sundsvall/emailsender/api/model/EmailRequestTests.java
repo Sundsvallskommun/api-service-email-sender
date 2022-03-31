@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+import se.sundsvall.emailsender.api.model.Sender;
 
 @ActiveProfiles("junit")
 class EmailRequestTests {
@@ -15,16 +16,14 @@ class EmailRequestTests {
     @Test
     void testGettersAndSetters() {
         var request = new SendEmailRequest();
-        request.setSenderName("someSenderName");
-        request.setSenderEmail("someSenderEmail");
+        request.setSender(new Sender());
         request.setEmailAddress("someEmailAddress");
         request.setSubject("someSubject");
         request.setMessage("someMessage");
         request.setHtmlMessage("someHtmlMessage");
         request.setAttachments(List.of(new SendEmailRequest.Attachment()));
 
-        assertThat(request.getSenderName()).isEqualTo("someSenderName");
-        assertThat(request.getSenderEmail()).isEqualTo("someSenderEmail");
+        assertThat(request.getSender()).isNotNull();
         assertThat(request.getEmailAddress()).isEqualTo("someEmailAddress");
         assertThat(request.getSubject()).isEqualTo("someSubject");
         assertThat(request.getMessage()).isEqualTo("someMessage");
@@ -35,8 +34,7 @@ class EmailRequestTests {
     @Test
     void testBuilder() {
         var request = SendEmailRequest.builder()
-            .withSenderName("someSenderName")
-            .withSenderEmail("someSenderEmail")
+            .withSender(new Sender())
             .withEmailAddress("someEmailAddress")
             .withSubject("someSubject")
             .withMessage("someMessage")
@@ -49,8 +47,7 @@ class EmailRequestTests {
                     .build()))
             .build();
 
-        assertThat(request.getSenderName()).isEqualTo("someSenderName");
-        assertThat(request.getSenderEmail()).isEqualTo("someSenderEmail");
+        assertThat(request.getSender()).isNotNull();
         assertThat(request.getEmailAddress()).isEqualTo("someEmailAddress");
         assertThat(request.getSubject()).isEqualTo("someSubject");
         assertThat(request.getMessage()).isEqualTo("someMessage");

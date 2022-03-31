@@ -33,6 +33,27 @@ class EmailRequestValidationTests {
     }
 
     @Test
+    void testValidationWithNullSender() {
+        var request = createEmailRequest(req -> req.setSender(null));
+        var constraintViolations = List.copyOf(validator.validate(request));
+
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("sender");
+        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must not be null");
+    }
+
+    @Test
+    void testValidationWithInvalidSender() {
+        var request = createEmailRequest(req -> req.getSender().setAddress("not-an-email-address"));
+        var constraintViolations = List.copyOf(validator.validate(request));
+
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("sender.address");
+        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must be a well-formed email address");
+
+    }
+
+    @Test
     void testValidationWithNullEmailAddress() {
         var request = createEmailRequest(req -> req.setEmailAddress(null));
         var constraintViolations = List.copyOf(validator.validate(request));
@@ -62,35 +83,6 @@ class EmailRequestValidationTests {
         assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must be a well-formed email address");
     }
 
-    @Test
-    void testValidationWithNullSenderName() {
-        var request = createEmailRequest(req -> req.setSenderName(null));
-
-        var constraintViolations = validator.validate(request);
-
-        assertThat(constraintViolations).hasSize(1);
-    }
-
-    @Test
-    void testValidationWithNullSenderEmailAddress() {
-        var request = createEmailRequest(req -> req.setEmailAddress(null));
-
-        var constraintViolations = validator.validate(request);
-
-        assertThat(constraintViolations).hasSize(1);
-    }
-
-    @Test
-    void testValidationWithInvalidSenderEmailAddress() {
-        var request = createEmailRequest(req -> req.setSenderEmail("not-an-email-address"));
-
-        var constraintViolations = List.copyOf(validator.validate(request));
-
-        assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("senderEmail");
-        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must be a well-formed email address");
-    }
-
     private SendEmailRequest createEmailRequest() {
         return createEmailRequest(null);
     }
@@ -109,8 +101,11 @@ class EmailRequestValidationTests {
             .withSubject("someSubject")
             .withMessage("someMessage")
             .withHtmlMessage(html)
-            .withSenderName("senderName")
-            .withSenderEmail("senderEmail@email.com")
+            .withSender(Sender.builder()
+                .withName("senderName")
+                .withAddress("senderName@somehost.com")
+                .withReplyTo("replyTo@somehost.com")
+                .build())
             .withAttachments(List.of(attachment, attachment))
             .build();
 
