@@ -22,6 +22,7 @@ class EmailConfiguration {
         var mailSender = new JavaMailSenderImpl();
         mailSender.setHost(props.getHostName());
         mailSender.setPort(props.getPort());
+
         if (!StringUtils.isBlank(props.getUsername())) {
             mailSender.setUsername(props.getUsername());
         }

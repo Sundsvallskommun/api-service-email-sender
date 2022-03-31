@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+import se.sundsvall.emailsender.api.model.Sender;
 import se.sundsvall.emailsender.service.EmailService;
 
 @ActiveProfiles("junit")
@@ -59,8 +60,10 @@ class EmailResourceTests {
             .withSubject("subject")
             .withMessage("message")
             .withHtmlMessage("htmlMessage")
-            .withSenderName("senderName")
-            .withSenderEmail(EMAIL_SENDER)
+            .withSender(Sender.builder()
+                .withName("senderName")
+                .withAddress(EMAIL_SENDER)
+                .build())
             .withAttachments(List.of(attachment))
             .build();
     }

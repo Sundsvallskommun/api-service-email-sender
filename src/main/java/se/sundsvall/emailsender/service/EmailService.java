@@ -39,7 +39,18 @@ public class EmailService {
     }
 
     MimeMessage createMessage(final MimeMessageHelper helper, final SendEmailRequest request) throws MessagingException {
-        helper.setFrom(String.format("%s <%s>", request.getSenderName(), request.getSenderEmail()));
+        // Handle sender
+        var sender = new StringBuilder();
+        if (StringUtils.isNotBlank(request.getSender().getName())) {
+            sender.append(request.getSender().getName()).append(" ");
+        }
+        sender.append("<").append(request.getSender().getAddress()).append(">");
+
+        // Handle reply-to: if no reply-to address is set, use the sender address
+        var replyTo = request.getSender().getReplyTo();
+        helper.setReplyTo(StringUtils.isNotBlank(replyTo) ? replyTo : request.getSender().getAddress());
+
+        helper.setFrom(sender.toString());
         helper.setTo(request.getEmailAddress());
         helper.setSubject(request.getSubject());
 

@@ -2,8 +2,10 @@ package se.sundsvall.emailsender.api.model;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -37,14 +39,9 @@ public class SendEmailRequest {
     @Schema(description = "E-mail HTML body (BASE64-encoded)")
     private String htmlMessage;
 
-    @Schema(description = "Sender name")
-    @NotBlank
-    private String senderName;
-
-    @Schema(description = "Sender e-mail address", example = "sender@sender.se")
-    @NotBlank
-    @Email
-    private String senderEmail;
+    @Valid
+    @NotNull
+    private Sender sender;
 
     @Schema(description = "Attachments")
     private List<Attachment> attachments;

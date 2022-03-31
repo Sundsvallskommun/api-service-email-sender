@@ -33,8 +33,7 @@ class EmailResource {
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
-            description = "Successful Operation",
-            content = @Content(schema = @Schema(implementation = Void.class))
+            description = "Successful Operation"
         ),
         @ApiResponse(
             responseCode = "400",
