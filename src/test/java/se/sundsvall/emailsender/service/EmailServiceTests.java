@@ -27,6 +27,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.ActiveProfiles;
 
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+import se.sundsvall.emailsender.api.model.Sender;
 
 @ActiveProfiles("junit")
 @ExtendWith(MockitoExtension.class)
@@ -102,8 +103,11 @@ class EmailServiceTests {
             .withSubject("subject")
             .withMessage("message")
             .withHtmlMessage("htmlMessage")
-            .withSenderName("senderName")
-            .withSenderEmail(EMAIL_SENDER)
+            .withSender(Sender.builder()
+                .withName("senderName")
+                .withAddress(EMAIL_SENDER)
+                .withReplyTo("replyTo@sender.com")
+                .build())
             .withAttachments(List.of(attachment))
             .build();
 
