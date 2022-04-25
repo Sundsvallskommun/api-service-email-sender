@@ -5,7 +5,7 @@
     <parent>
         <groupId>se.sundsvall.dept44</groupId>
         <artifactId>dept44-service-parent</artifactId>
-        <version>0.10-SNAPSHOT</version>
+        <version>0.20-SNAPSHOT</version>
         <relativePath />
     </parent>
     <groupId>se.sundsvall</groupId>
@@ -13,9 +13,14 @@
     <version>1.0</version>
     <name>api-service-email-sender</name>
 
-	<properties>
-		<docker.image.name>ms-email-sender</docker.image.name>
-	</properties>
+    <properties>
+        <docker.image.name>ms-email-sender</docker.image.name>
+
+        <exposed.app.port>8080</exposed.app.port>
+        <published.container.port.sandbox>9021</published.container.port.sandbox>
+        <published.container.port.test>9020</published.container.port.test>
+        <published.container.port.production>9020</published.container.port.production>
+    </properties>
 
     <dependencies>
         <!-- Test -->
