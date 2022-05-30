@@ -47,6 +47,7 @@ class EmailResource {
     @PostMapping("/send/email")
     ResponseEntity<Void> sendMail(@Valid @RequestBody final SendEmailRequest request) throws MessagingException {
         service.sendMail(request);
-        return ResponseEntity.ok(null);
+
+        return ResponseEntity.ok().build();
     }
 }

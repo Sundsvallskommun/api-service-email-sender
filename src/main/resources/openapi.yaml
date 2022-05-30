@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: '@project.version@'
+  version: "1.0"
 servers:
 - url: http://localhost:8080
   description: Generated server url
@@ -29,14 +29,14 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
-        "200":
-          description: Successful Operation
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful Operation
   /api-docs:
     get:
       tags:
@@ -74,8 +74,7 @@ components:
     SendEmailRequest:
       required:
       - emailAddress
-      - senderEmail
-      - senderName
+      - sender
       - subject
       type: object
       properties:
@@ -92,18 +91,30 @@ components:
         htmlMessage:
           type: string
           description: E-mail HTML body (BASE64-encoded)
-        senderName:
-          type: string
-          description: Sender name
-        senderEmail:
-          type: string
-          description: Sender e-mail address
-          example: sender@sender.se
+        sender:
+          $ref: '#/components/schemas/Sender'
         attachments:
           type: array
           description: Attachments
           items:
             $ref: '#/components/schemas/Attachment'
+    Sender:
+      required:
+      - address
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: The sender of the e-mail
+        address:
+          type: string
+          description: Sender e-mail address
+          example: sender@sender.se
+        replyTo:
+          type: string
+          description: Reply-to e-mail address
+          example: sender@sender.se
     Problem:
       type: object
       properties:
@@ -117,18 +128,18 @@ components:
           type: object
           additionalProperties:
             type: object
-        status:
-          $ref: '#/components/schemas/StatusType'
         title:
           type: string
+        status:
+          $ref: '#/components/schemas/StatusType'
         detail:
           type: string
     StatusType:
       type: object
       properties:
+        reasonPhrase:
+          type: string
         statusCode:
           type: integer
           format: int32
-        reasonPhrase:
-          type: string
   securitySchemes: {}
