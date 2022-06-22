@@ -23,16 +23,16 @@ paths:
               $ref: '#/components/schemas/SendEmailRequest'
         required: true
       responses:
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
         "200":
           description: Successful Operation
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
@@ -74,8 +74,7 @@ components:
     SendEmailRequest:
       required:
       - emailAddress
-      - senderEmail
-      - senderName
+      - sender
       - subject
       type: object
       properties:
@@ -92,18 +91,30 @@ components:
         htmlMessage:
           type: string
           description: E-mail HTML body (BASE64-encoded)
-        senderName:
-          type: string
-          description: Sender name
-        senderEmail:
-          type: string
-          description: Sender e-mail address
-          example: sender@sender.se
+        sender:
+          $ref: '#/components/schemas/Sender'
         attachments:
           type: array
           description: Attachments
           items:
             $ref: '#/components/schemas/Attachment'
+    Sender:
+      required:
+      - address
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: The sender of the e-mail
+        address:
+          type: string
+          description: Sender e-mail address
+          example: sender@sender.se
+        replyTo:
+          type: string
+          description: Reply-to e-mail address
+          example: sender@sender.se
     Problem:
       type: object
       properties:
