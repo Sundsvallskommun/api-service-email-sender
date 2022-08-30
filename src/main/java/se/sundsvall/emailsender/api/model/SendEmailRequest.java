@@ -7,6 +7,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import se.sundsvall.emailsender.api.model.validation.ValidBase64String;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -37,6 +39,7 @@ public class SendEmailRequest {
     private String message;
 
     @Schema(description = "E-mail HTML body (BASE64-encoded)")
+    @ValidBase64String(nullable = true)
     private String htmlMessage;
 
     @Valid
@@ -44,7 +47,7 @@ public class SendEmailRequest {
     private Sender sender;
 
     @Schema(description = "Attachments")
-    private List<Attachment> attachments;
+    private List<@Valid Attachment> attachments;
 
     @Getter
     @NoArgsConstructor
@@ -53,12 +56,15 @@ public class SendEmailRequest {
     public static class Attachment {
 
         @Schema(description = "The attachment (file) content as a BASE64-encoded string", example = "aGVsbG8gd29ybGQK")
+        @ValidBase64String
         private String content;
 
         @Schema(description = "The attachment filename", example = "test.txt")
+        @NotBlank
         private String name;
 
         @Schema(description = "The attachment content type", example = "text/plain")
+        @NotBlank
         private String contentType;
     }
 }

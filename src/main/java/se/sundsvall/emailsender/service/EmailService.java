@@ -9,6 +9,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,11 +19,10 @@ import org.springframework.stereotype.Service;
 
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class EmailService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -55,9 +56,21 @@ public class EmailService {
         helper.setSubject(request.getSubject());
 
         if (StringUtils.isBlank(request.getHtmlMessage())) {
+            LOG.info("No HTML message present - sending plain text only");
+
             helper.setText(request.getMessage());
-        } else if (isValidBase64String(request.getHtmlMessage())) {
-            helper.setText(request.getMessage(), new String(Base64.getDecoder().decode(request.getHtmlMessage())));
+        } else {
+            var decodedHtmlMessage = decodeHtmlMessage(request.getHtmlMessage());
+
+            if (decodedHtmlMessage.isEmpty()) {
+                LOG.info("Unable to BASE64-decode HTML message - sending plain text only");
+
+                helper.setText(request.getMessage());
+            } else {
+                LOG.info("HTML message BASE64-decoded - sending HTML and plain text");
+
+                helper.setText(request.getMessage(), decodedHtmlMessage.get());
+            }
         }
 
         for (var attachment : Optional.ofNullable(request.getAttachments()).orElse(List.of())) {
@@ -70,11 +83,20 @@ public class EmailService {
         return helper.getMimeMessage();
     }
 
+    Optional<String> decodeHtmlMessage(final String s) {
+        try {
+            return Optional.of(new String(Base64.getDecoder().decode(s)));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
     boolean isValidBase64String(String content) {
         try {
             Base64.getDecoder().decode(content);
         } catch (IllegalArgumentException e) {
-            log.info("faulty base64 ?" + e.getMessage());
+            LOG.info("Unable to decode BASE64");
+
             return false;
         }
         return true;
