@@ -31,7 +31,7 @@ import net.javacrumbs.jsonunit.core.internal.Options;
         "logging.level.se.sundsvall.dept44.payload=OFF"
     }
 )
-class GenerateOpenApiIT {
+class OpenApiSpecificationIT {
 
     private static final YAMLMapper YAML_MAPPER = new YAMLMapper();
 
@@ -40,7 +40,7 @@ class GenerateOpenApiIT {
     @Value("${openapi.version}")
     private String openApiVersion;
 
-    @Value("classpath:/openapi.yaml")
+    @Value("classpath:/openapi.yml")
     private Resource openApiResource;
 
     @Autowired

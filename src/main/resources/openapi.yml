@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: '@project.version@'
+  version: "1.0"
 servers:
 - url: http://localhost:8080
   description: Generated server url
@@ -29,14 +29,14 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
-        "200":
-          description: Successful Operation
         "400":
           description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful Operation
   /api-docs:
     get:
       tags:
@@ -56,6 +56,9 @@ paths:
 components:
   schemas:
     Attachment:
+      required:
+      - contentType
+      - name
       type: object
       properties:
         content:
@@ -118,6 +121,12 @@ components:
     Problem:
       type: object
       properties:
+        status:
+          $ref: '#/components/schemas/StatusType'
+        detail:
+          type: string
+        title:
+          type: string
         instance:
           type: string
           format: uri
@@ -128,12 +137,6 @@ components:
           type: object
           additionalProperties:
             type: object
-        status:
-          $ref: '#/components/schemas/StatusType'
-        title:
-          type: string
-        detail:
-          type: string
     StatusType:
       type: object
       properties:
