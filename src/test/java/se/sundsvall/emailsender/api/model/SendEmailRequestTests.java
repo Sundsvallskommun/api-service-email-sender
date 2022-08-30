@@ -11,7 +11,7 @@ import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.api.model.Sender;
 
 @ActiveProfiles("junit")
-class EmailRequestTests {
+class SendEmailRequestTests {
 
     @Test
     void testGettersAndSetters() {
