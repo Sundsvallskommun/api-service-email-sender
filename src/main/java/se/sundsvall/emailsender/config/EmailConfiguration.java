@@ -30,6 +30,9 @@ class EmailConfiguration {
             mailSender.setPassword(props.getPassword());
         }
 
+        // Set additional JavaMail properties
+        mailSender.setJavaMailProperties(props.getProperties());
+
         return mailSender;
     }
 }
