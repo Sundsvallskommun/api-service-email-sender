@@ -1,5 +1,7 @@
 package se.sundsvall.emailsender.config;
 
+import java.util.Properties;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Getter;
@@ -14,4 +16,6 @@ public class EmailProperties {
     private int port = 25;
     private String username;
     private String password;
+
+    private Properties properties;
 }
