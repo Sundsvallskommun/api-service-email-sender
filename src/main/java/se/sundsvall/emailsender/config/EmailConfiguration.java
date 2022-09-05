@@ -18,7 +18,7 @@ class EmailConfiguration {
     }
 
     @Bean("integration.email.mailsender")
-    JavaMailSender javaMailSender() {
+    JavaMailSender javaMailSender() throws Exception {
         var mailSender = new JavaMailSenderImpl();
         mailSender.setHost(props.getHostName());
         mailSender.setPort(props.getPort());
@@ -29,6 +29,10 @@ class EmailConfiguration {
         if (!StringUtils.isBlank(props.getPassword())) {
             mailSender.setPassword(props.getPassword());
         }
+
+        //var sslSocketFactory = new MailSSLSocketFactory();
+        //sslSocketFactory.setTrustAllHosts(true);
+        //props.getProperties().put("mail.smtp.ssl.socketFactory", sslSocketFactory);
 
         // Set additional JavaMail properties
         mailSender.setJavaMailProperties(props.getProperties());
