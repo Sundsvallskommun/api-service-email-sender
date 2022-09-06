@@ -27,7 +27,7 @@ class EmailResource {
         this.service = service;
     }
 
-    @Operation(summary = "Send an Email")
+    @Operation(summary = "Send an e-mail")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",

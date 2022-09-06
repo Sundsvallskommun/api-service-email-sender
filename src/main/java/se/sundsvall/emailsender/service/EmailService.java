@@ -1,20 +1,32 @@
 package se.sundsvall.emailsender.service;
 
+import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
+import static org.zalando.fauxpas.FauxPas.throwingFunction;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import javax.activation.DataHandler;
+import javax.mail.BodyPart;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
+import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
@@ -26,72 +38,95 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    public EmailService(@Qualifier("integration.email.mailsender") JavaMailSender mailSender) {
+    public EmailService(@Qualifier("integration.email.mailsender") final JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
     public boolean sendMail(final SendEmailRequest request) throws MessagingException {
-        var helper = new MimeMessageHelper(mailSender.createMimeMessage(), true, StandardCharsets.UTF_8.name());
-        var email = createMessage(helper, request);
+        var mimeMessage = createMimeMessage(request);
 
-        mailSender.send(email);
+        try {
+            mailSender.send(mimeMessage);
+        } catch (MailSendException e) {
+            e.printStackTrace(System.err);
+        }
 
         return true;
     }
 
-    MimeMessage createMessage(final MimeMessageHelper helper, final SendEmailRequest request) throws MessagingException {
-        // Handle sender
-        var sender = new StringBuilder();
-        if (StringUtils.isNotBlank(request.getSender().getName())) {
-            sender.append(request.getSender().getName()).append(" ");
+    MimeMessage createMimeMessage(final SendEmailRequest request) throws MessagingException {
+        var message = mailSender.createMimeMessage();
+
+        // Handle sender (NAME <ADDRESS>)
+        var sender = new StringBuilder()
+            .append(request.getSender().getName())
+            .append(" ")
+            .append("<").append(request.getSender().getAddress()).append(">");
+        message.setFrom(sender.toString());
+
+        // Handle reply-to - if no reply-to address is set, use the sender address
+        var replyTo = Optional.ofNullable(request.getSender().getReplyTo())
+            .filter(StringUtils::isNotBlank)
+            .orElseGet(() -> request.getSender().getAddress());
+        message.setReplyTo(InternetAddress.parse(replyTo));
+
+        // Handle recipient
+        message.setRecipients(Message.RecipientType.TO, request.getEmailAddress());
+        // Handle subject
+        message.setSubject(request.getSubject(), StandardCharsets.UTF_8.name());
+        // Handle content and attachments
+        message.setContent(createMultiPart(request));
+        return message;
+    }
+
+    Multipart createMultiPart(final SendEmailRequest request) throws MessagingException {
+        var multipart = new MimeMultipart("alternative");
+        // Add text first, to give priority to HTML
+        multipart.addBodyPart((BodyPart) createTextMimePart(request.getMessage()));
+        if (StringUtils.isNotBlank(request.getHtmlMessage())) {
+            multipart.addBodyPart((BodyPart) createHtmlMimePart(request.getHtmlMessage()));
         }
-        sender.append("<").append(request.getSender().getAddress()).append(">");
 
-        // Handle reply-to: if no reply-to address is set, use the sender address
-        var replyTo = request.getSender().getReplyTo();
-        helper.setReplyTo(StringUtils.isNotBlank(replyTo) ? replyTo : request.getSender().getAddress());
-
-        helper.setFrom(sender.toString());
-        helper.setTo(request.getEmailAddress());
-        helper.setSubject(request.getSubject());
-
-        if (StringUtils.isBlank(request.getHtmlMessage())) {
-            LOG.info("No HTML message present - sending plain text only");
-
-            helper.setText(request.getMessage());
-        } else {
-            var decodedHtmlMessage = decodeHtmlMessage(request.getHtmlMessage());
-
-            if (decodedHtmlMessage.isEmpty()) {
-                LOG.info("Unable to BASE64-decode HTML message - sending plain text only");
-
-                helper.setText(request.getMessage());
-            } else {
-                LOG.info("HTML message BASE64-decoded - sending HTML and plain text");
-
-                helper.setText(request.getMessage(), decodedHtmlMessage.get());
-            }
-        }
-
+        // Handle attachments
         for (var attachment : Optional.ofNullable(request.getAttachments()).orElse(List.of())) {
-            if (!isValidBase64String(attachment.getContent())) {
+            if (!isValidBase64(attachment.getContent())) {
                 continue;
             }
             byte[] content = Base64.getDecoder().decode(attachment.getContent());
-            helper.addAttachment(attachment.getName(), new ByteArrayResource(content), attachment.getContentType());
+            var attachmentPart  = new MimeBodyPart();
+            attachmentPart.setFileName(attachment.getName());
+            attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(content, attachmentPart.getContentType())));
+            multipart.addBodyPart(attachmentPart);
         }
-        return helper.getMimeMessage();
+
+        return multipart;
     }
 
-    Optional<String> decodeHtmlMessage(final String s) {
+    MimePart createTextMimePart(final String content) throws MessagingException {
+        var part = new MimeBodyPart();
+        part.setText(content, StandardCharsets.UTF_8.name(), TEXT_PLAIN.getSubtype());
+        return part;
+    }
+
+    MimePart createHtmlMimePart(final String content) throws MessagingException {
+        return decodeBase64(content)
+            .map(throwingFunction(decodedContent -> {
+                var part = new MimeBodyPart();
+                part.setText(decodedContent, StandardCharsets.UTF_8.name(), TEXT_HTML.getSubtype());
+                return part;
+            }))
+            .orElseThrow(() -> new MessagingException("Unable to decode BASE64"));
+    }
+
+    Optional<String> decodeBase64(final String s) {
         try {
-            return Optional.of(new String(Base64.getDecoder().decode(s)));
+            return Optional.of(new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8));
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
     }
 
-    boolean isValidBase64String(String content) {
+    boolean isValidBase64(String content) {
         try {
             Base64.getDecoder().decode(content);
         } catch (IllegalArgumentException e) {

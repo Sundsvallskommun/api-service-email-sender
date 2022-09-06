@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: "1.0"
+  version: '@project.version@'
 servers:
 - url: http://localhost:8080
   description: Generated server url
@@ -14,7 +14,7 @@ paths:
     post:
       tags:
       - email-resource
-      summary: Send an Email
+      summary: Send an e-mail
       operationId: sendMail
       requestBody:
         content:
@@ -23,20 +23,20 @@ paths:
               $ref: '#/components/schemas/SendEmailRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful Operation
         "400":
           description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
-        "200":
-          description: Successful Operation
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Problem'
   /api-docs:
     get:
       tags:
@@ -121,12 +121,6 @@ components:
     Problem:
       type: object
       properties:
-        status:
-          $ref: '#/components/schemas/StatusType'
-        detail:
-          type: string
-        title:
-          type: string
         instance:
           type: string
           format: uri
@@ -137,6 +131,12 @@ components:
           type: object
           additionalProperties:
             type: object
+        status:
+          $ref: '#/components/schemas/StatusType'
+        title:
+          type: string
+        detail:
+          type: string
     StatusType:
       type: object
       properties:

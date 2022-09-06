@@ -2,19 +2,20 @@ package se.sundsvall.emailsender.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.activation.DataSource;
+import javax.mail.Address;
+import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Session;
+import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.ActiveProfiles;
 
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
@@ -36,60 +36,34 @@ class EmailServiceTests {
     private final static String EMAIL_SENDER = "sender@sender.com";
     private final static String EMAIL_RECEIVER = "receiver@receiver.com";
 
+    @Mock
+    private JavaMailSender mockMailSender;
+    @Mock
+    private MimeMessage mockMimeMessage;
+
     private EmailService service;
-
-    @Mock
-    private JavaMailSender mockSender;
-
-    @Mock
-    private MimeMessageHelper helper;
-
-    private MimeMessage mimeMessage;
 
     @BeforeEach
     void init() {
-        mockSender.createMimeMessage();
-        mimeMessage = new MimeMessage((Session) null);
-        service = new EmailService(mockSender);
+        service = new EmailService(mockMailSender);
     }
 
     @Test
     void sendEmail_withValidRequest_returnsTrue() throws MessagingException {
         var request = validEmailRequest(null);
-        when(mockSender.createMimeMessage()).thenReturn(mimeMessage);
+        when(mockMailSender.createMimeMessage()).thenReturn(mockMimeMessage);
 
         var result = service.sendMail(request);
         assertThat(result).isTrue();
 
-        verify(mockSender, times(1)).send(mimeMessage);
-    }
-
-    @Test
-    void sendEmail_withinvalidAttachment_returns() throws MessagingException {
-        String invalidBase64 = "not a base 64 string";
-        var invalidAttachment = SendEmailRequest.Attachment.builder()
-            .withContent(invalidBase64)
-            .withName("attachment")
-            .withContentType("image/jpg")
-            .build();
-
-        var request = validEmailRequest((req) -> {
-            req.setAttachments(List.of(invalidAttachment));
-            req.setHtmlMessage(null);
-        });
-        service.createMessage(helper, request);
-
-        verify(helper, never()).addAttachment(anyString(), any(DataSource.class));
-    }
-
-    @Test
-    void getOrEmptyAttatchment_givenEmptyListOfAttatchment_returnEmptyList() throws MessagingException {
-        var request = validEmailRequest((req) -> {
-            req.setAttachments(null);
-        });
-        service.createMessage(helper, request);
-
-        verify(helper, never()).addAttachment(anyString(), any(DataSource.class));
+        verify(mockMailSender, times(1)).send(mockMimeMessage);
+        verifyNoMoreInteractions(mockMailSender);
+        verify(mockMimeMessage, times(1)).setFrom(any(String.class));
+        verify(mockMimeMessage, times(1)).setReplyTo(any(Address[].class));
+        verify(mockMimeMessage, times(1)).setRecipients(eq(Message.RecipientType.TO), any(String.class));
+        verify(mockMimeMessage, times(1)).setSubject(any(String.class), any(String.class));
+        verify(mockMimeMessage, times(1)).setContent(any(Multipart.class));
+        verifyNoMoreInteractions(mockMimeMessage);
     }
 
     private SendEmailRequest validEmailRequest(final Consumer<SendEmailRequest> modifier) {
