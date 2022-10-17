@@ -96,6 +96,8 @@ public class EmailService {
             var attachmentPart  = new MimeBodyPart();
             attachmentPart.setFileName(attachment.getName());
             attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(content, attachmentPart.getContentType())));
+            attachmentPart.setHeader("Content-Type", attachment.getContentType());
+            attachmentPart.setHeader("Content-Transfer-Encoding", "base64");
             multipart.addBodyPart(attachmentPart);
         }
 
