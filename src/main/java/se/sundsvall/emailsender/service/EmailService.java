@@ -81,8 +81,10 @@ public class EmailService {
 
     Multipart createMultiPart(final SendEmailRequest request) throws MessagingException {
         var multipart = new MimeMultipart("alternative");
-        // Add text first, to give priority to HTML
-        multipart.addBodyPart((BodyPart) createTextMimePart(request.getMessage()));
+        // If plain-text message is provided, add it first, to give priority to HTML if it exists
+        if (StringUtils.isNotBlank(request.getMessage())) {
+            multipart.addBodyPart((BodyPart) createTextMimePart(request.getMessage()));
+        }
         if (StringUtils.isNotBlank(request.getHtmlMessage())) {
             multipart.addBodyPart((BodyPart) createHtmlMimePart(request.getHtmlMessage()));
         }
@@ -96,8 +98,8 @@ public class EmailService {
             var attachmentPart  = new MimeBodyPart();
             attachmentPart.setFileName(attachment.getName());
             attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(content, attachmentPart.getContentType())));
-            attachmentPart.setHeader("Content-Type", attachment.getContentType());
-            attachmentPart.setHeader("Content-Transfer-Encoding", "base64");
+            //attachmentPart.setHeader("Content-Type", attachment.getContentType());
+            //attachmentPart.setHeader("Content-Transfer-Encoding", "base64");
             multipart.addBodyPart(attachmentPart);
         }
 
