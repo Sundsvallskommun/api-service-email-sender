@@ -29,12 +29,15 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 @Service
 public class EmailService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
+
+    private static final ValidBase64ConstraintValidator BASE64_VALIDATOR = new ValidBase64ConstraintValidator();
 
     private final JavaMailSender mailSender;
 
@@ -76,6 +79,7 @@ public class EmailService {
         message.setSubject(request.getSubject(), StandardCharsets.UTF_8.name());
         // Handle content and attachments
         message.setContent(createMultiPart(request));
+
         return message;
     }
 
@@ -91,15 +95,16 @@ public class EmailService {
 
         // Handle attachments
         for (var attachment : Optional.ofNullable(request.getAttachments()).orElse(List.of())) {
-            if (!isValidBase64(attachment.getContent())) {
+            if (!BASE64_VALIDATOR.isValid(attachment.getContent())) {
                 continue;
             }
             byte[] content = Base64.getDecoder().decode(attachment.getContent());
             var attachmentPart  = new MimeBodyPart();
             attachmentPart.setFileName(attachment.getName());
             attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(content, attachmentPart.getContentType())));
-            //attachmentPart.setHeader("Content-Type", attachment.getContentType());
-            //attachmentPart.setHeader("Content-Transfer-Encoding", "base64");
+            attachmentPart.setHeader("Content-Type", attachment.getContentType());
+            // Set content-transfer-encoding header to base64, to minimize encoding issues
+            attachmentPart.setHeader("Content-Transfer-Encoding", "base64");
             multipart.addBodyPart(attachmentPart);
         }
 
@@ -128,16 +133,5 @@ public class EmailService {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
-    }
-
-    boolean isValidBase64(String content) {
-        try {
-            Base64.getDecoder().decode(content);
-        } catch (IllegalArgumentException e) {
-            LOG.info("Unable to decode BASE64");
-
-            return false;
-        }
-        return true;
     }
 }
