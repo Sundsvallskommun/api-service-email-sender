@@ -106,8 +106,8 @@ class SenderValidationTests {
     private Sender createSender(final Consumer<Sender> modifier) {
         var sender= Sender.builder()
             .withName("Sundsvalls Kommun")
-            .withAddress("info@sundsvall.se")
-            .withReplyTo("support@sundsvall.se")
+            .withAddress("address@sender.se")
+            .withReplyTo("replyto@sender.se")
             .build();
 
         if (modifier != null) {
