@@ -1,0 +1,23 @@
+version: "3"
+services:
+  email-sender:
+    container_name: ms-email-sender
+    image: 'evil.sundsvall.se/ms-email-sender:latest'
+    network_mode: bridge
+    restart: always
+    ports:
+      - "9020:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+
+      # Spring Cloud config
+      - SPRING_CLOUD_CONFIG_URI=<changeme>
+      - SPRING_CLOUD_CONFIG_USERNAME=<changeme>
+      - SPRING_CLOUD_CONFIG_PASSWORD=<changeme>
+
+      # SMTP settings
+      - SMTP_HOST=<changeme>
+      - SMTP_PORT=25
+      - SMTP_USERNAME=<changeme>
+      - SMTP_PASSWORD=<changeme>
+

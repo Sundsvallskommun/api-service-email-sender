@@ -1,0 +1,23 @@
+# General
+spring:
+  application:
+    name: api-email-sender
+
+# OpenAPI
+openapi:
+  name: api-service-email-sender
+  version: '@project.version@'
+  title: EmailSender
+
+# SMTP properties
+integration:
+  email:
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+          allow8bitmime: true
+        mime:
+          charset: UTF-8
