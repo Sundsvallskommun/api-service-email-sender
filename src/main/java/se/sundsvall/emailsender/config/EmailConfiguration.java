@@ -1,6 +1,7 @@
 package se.sundsvall.emailsender.config;
 
-import org.apache.commons.lang3.StringUtils;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,28 +12,28 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 @EnableConfigurationProperties(EmailProperties.class)
 class EmailConfiguration {
 
-    private final EmailProperties props;
+	private final EmailProperties props;
 
-    EmailConfiguration(final EmailProperties props) {
-        this.props = props;
-    }
+	EmailConfiguration(final EmailProperties props) {
+		this.props = props;
+	}
 
-    @Bean("integration.email.mail-sender")
-    JavaMailSender javaMailSender() {
-        var mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(props.hostName());
-        mailSender.setPort(props.port());
+	@Bean("integration.email.mail-sender")
+	JavaMailSender javaMailSender() {
+		final var mailSender = new JavaMailSenderImpl();
+		mailSender.setHost(props.hostName());
+		mailSender.setPort(props.port());
 
-        if (!StringUtils.isBlank(props.username())) {
-            mailSender.setUsername(props.username());
-        }
-        if (!StringUtils.isBlank(props.password())) {
-            mailSender.setPassword(props.password());
-        }
+		if (!isBlank(props.username())) {
+			mailSender.setUsername(props.username());
+		}
+		if (!isBlank(props.password())) {
+			mailSender.setPassword(props.password());
+		}
 
-        // Set additional JavaMail properties
-        mailSender.setJavaMailProperties(props.properties());
+		// Set additional JavaMail properties
+		mailSender.setJavaMailProperties(props.properties());
 
-        return mailSender;
-    }
+		return mailSender;
+	}
 }

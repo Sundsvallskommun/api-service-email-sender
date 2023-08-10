@@ -4,80 +4,57 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
 
 import java.util.List;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
-
 @ActiveProfiles("junit")
 class EmailRequestValidationTests {
 
-    private Validator validator;
+	private Validator validator;
 
-    @BeforeEach
-    void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
-    }
+	@BeforeEach
+	void setUp() {
+		validator = Validation.buildDefaultValidatorFactory().getValidator();
+	}
 
-    @Test
-    void testValidationWithValidRequest() {
-        var request = createValidEmailRequest();
-        var constraintViolations = validator.validate(request);
+	@Test
+	void validationWithValidRequest() {
+		final var request = createValidEmailRequest();
+		final var constraintViolations = validator.validate(request);
 
-        assertThat(constraintViolations).isEmpty();
-    }
+		assertThat(constraintViolations).isEmpty();
+	}
 
-    @Test
-    void testValidationWithNullSender() {
-        var request = createValidEmailRequest(req -> req.setSender(null));
-        var constraintViolations = List.copyOf(validator.validate(request));
+	@ParameterizedTest
+	@MethodSource("testValidationArguments")
+	void testValidation(SendEmailRequest request, String constraintField, String constraintMessage) {
 
-        assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("sender");
-        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must not be null");
-    }
+		final var constraintViolations = List.copyOf(validator.validate(request));
 
-    @Test
-    void testValidationWithInvalidSender() {
-        var request = createValidEmailRequest(req -> req.getSender().setAddress("not-an-email-address"));
-        var constraintViolations = List.copyOf(validator.validate(request));
+		assertThat(constraintViolations).hasSize(1);
+		assertThat(constraintViolations.get(0).getPropertyPath()).hasToString(constraintField);
+		assertThat(constraintViolations.get(0).getMessage()).isEqualTo(constraintMessage);
+	}
 
-        assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("sender.address");
-        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must be a well-formed email address");
+	private static Stream<Arguments> testValidationArguments() {
+		return Stream.of(
 
-    }
+			// Validate recipient email address.
+			Arguments.of(createValidEmailRequest(req -> req.setEmailAddress(null)), "emailAddress", "must not be blank"),
+			Arguments.of(createValidEmailRequest(req -> req.setEmailAddress("")), "emailAddress", "must not be blank"),
+			Arguments.of(createValidEmailRequest(req -> req.setEmailAddress("kalle")), "emailAddress", "must be a well-formed email address"),
 
-    @Test
-    void testValidationWithNullEmailAddress() {
-        var request = createValidEmailRequest(req -> req.setEmailAddress(null));
-        var constraintViolations = List.copyOf(validator.validate(request));
-
-        assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("emailAddress");
-        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must not be blank");
-    }
-
-    @Test
-    void testValidationWithBlankEmailAddress() {
-        var request = createValidEmailRequest(req -> req.setEmailAddress(""));
-        var constraintViolations = List.copyOf(validator.validate(request));
-
-        assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("emailAddress");
-        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must not be blank");
-    }
-
-    @Test
-    void testValidationWithInvalidEmailAddress() {
-        var request = createValidEmailRequest(req -> req.setEmailAddress("kalle"));
-        var constraintViolations = List.copyOf(validator.validate(request));
-
-        assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolations.get(0).getPropertyPath().toString()).isEqualTo("emailAddress");
-        assertThat(constraintViolations.get(0).getMessage()).isEqualTo("must be a well-formed email address");
-    }
+			// Validate sender email address.
+			Arguments.of(createValidEmailRequest(req -> req.getSender().setAddress("not-an-email-address")), "sender.address", "must be a well-formed email address"),
+			Arguments.of(createValidEmailRequest(req -> req.setSender(null)), "sender", "must not be null"));
+	}
 }
