@@ -2,7 +2,6 @@ package se.sundsvall.emailsender.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -42,13 +41,13 @@ class EmailServiceTests {
 
 		service.sendMail(request);
 
-		verify(mockMailSender, times(1)).send(mockMimeMessage);
+		verify(mockMailSender).send(mockMimeMessage);
 		verifyNoMoreInteractions(mockMailSender);
-		verify(mockMimeMessage, times(1)).setFrom(any(String.class));
-		verify(mockMimeMessage, times(1)).setReplyTo(any(Address[].class));
-		verify(mockMimeMessage, times(1)).setRecipients(eq(Message.RecipientType.TO), any(String.class));
-		verify(mockMimeMessage, times(1)).setSubject(any(String.class), any(String.class));
-		verify(mockMimeMessage, times(1)).setContent(any(Multipart.class));
+		verify(mockMimeMessage).setFrom(any(String.class));
+		verify(mockMimeMessage).setReplyTo(any(Address[].class));
+		verify(mockMimeMessage).setRecipients(eq(Message.RecipientType.TO), any(String.class));
+		verify(mockMimeMessage).setSubject(any(String.class), any(String.class));
+		verify(mockMimeMessage).setContent(any(Multipart.class));
 		verifyNoMoreInteractions(mockMimeMessage);
 	}
 }

@@ -3,7 +3,6 @@ package se.sundsvall.emailsender.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
 
@@ -35,6 +34,6 @@ class EmailResourceTests {
 		final var result = emailResource.sendMail(createValidEmailRequest());
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-		verify(mockService, times(1)).sendMail(any(SendEmailRequest.class));
+		verify(mockService).sendMail(any(SendEmailRequest.class));
 	}
 }
