@@ -5,14 +5,10 @@ import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
 
 import jakarta.activation.DataHandler;
 import jakarta.mail.BodyPart;
@@ -24,7 +20,14 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.internet.MimePart;
+import jakarta.mail.internet.MimeUtility;
 import jakarta.mail.util.ByteArrayDataSource;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
@@ -50,7 +53,7 @@ public class EmailService {
 
 		// Handle sender (NAME <ADDRESS>)
 		final var sender = new StringBuilder()
-			.append(request.getSender().getName())
+			.append(encode(request.getSender().getName()))
 			.append(" ")
 			.append("<").append(request.getSender().getAddress()).append(">");
 		message.setFrom(sender.toString());
@@ -69,6 +72,14 @@ public class EmailService {
 		message.setContent(createMultiPart(request));
 
 		return message;
+	}
+
+	String encode(final String s) throws MessagingException {
+		try {
+			return MimeUtility.encodeText(s, UTF_8.name(), "B");
+		} catch (UnsupportedEncodingException e) {
+			throw new MessagingException("Encoding error", e);
+		}
 	}
 
 	Multipart createMultiPart(final SendEmailRequest request) throws MessagingException {
