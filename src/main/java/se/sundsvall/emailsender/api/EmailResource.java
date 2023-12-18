@@ -29,7 +29,8 @@ class EmailResource {
 	@Operation(summary = "Send an e-mail")
 	@ApiResponse(
 		responseCode = "200",
-		description = "Successful Operation")
+		description = "Successful Operation",
+		useReturnTypeSchema = true)
 	@ApiResponse(
 		responseCode = "400",
 		description = "Bad Request",

@@ -1,0 +1,7 @@
+integration:
+  email:
+    hostname: somehost.com
+    port: 25
+spring:
+  main:
+    banner-mode: 'off'
