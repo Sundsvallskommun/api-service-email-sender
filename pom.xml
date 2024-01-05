@@ -13,11 +13,12 @@
     <version>1.0</version>
     <name>api-service-email-sender</name>
     <properties>
+		<!-- Pipeline properties -->
         <docker.image.name>ms-email-sender</docker.image.name>
-        <faux-pas.version>0.9.0</faux-pas.version>
-        <exposed.app.port>8080</exposed.app.port>
         <published.container.port.test>9020</published.container.port.test>
         <published.container.port.production>9020</published.container.port.production>
+        <!-- Service properties -->
+        <faux-pas.version>0.9.0</faux-pas.version>
     </properties>
     <dependencies>
         <!-- Test -->
