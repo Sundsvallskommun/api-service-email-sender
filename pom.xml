@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>se.sundsvall.dept44</groupId>
         <artifactId>dept44-service-parent</artifactId>
         <version>4.0</version>
-        <relativePath />
+        <relativePath/>
     </parent>
     <groupId>se.sundsvall</groupId>
     <artifactId>api-service-email-sender</artifactId>
     <version>1.0</version>
     <name>api-service-email-sender</name>
     <properties>
-		<!-- Pipeline properties -->
+        <!-- Pipeline properties -->
         <docker.image.name>ms-email-sender</docker.image.name>
         <published.container.port.test>9020</published.container.port.test>
         <published.container.port.production>9020</published.container.port.production>
