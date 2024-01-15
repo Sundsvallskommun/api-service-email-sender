@@ -51,9 +51,9 @@ class EmailServiceTests {
 		verify(mockMimeMessage).setRecipients(eq(Message.RecipientType.TO), any(String.class));
 		verify(mockMimeMessage).setSubject(any(String.class), any(String.class));
 		verify(mockMimeMessage).setContent(any(Multipart.class));
-		verify(mockMimeMessage).addHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
-		verify(mockMimeMessage).addHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
-		verify(mockMimeMessage).addHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
+		verify(mockMimeMessage).setHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
+		verify(mockMimeMessage).setHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
+		verify(mockMimeMessage).setHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
 		verifyNoMoreInteractions(mockMimeMessage);
 	}
 
@@ -72,10 +72,10 @@ class EmailServiceTests {
 
 		service.addOptionalHeaders(mockMimeMessage, request);
 
-		verify(mockMimeMessage).addHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
-		verify(mockMimeMessage).addHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
-		verify(mockMimeMessage).addHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
-		verify(mockMimeMessage, times(3)).addHeader(any(String.class), any(String.class));
+		verify(mockMimeMessage).setHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
+		verify(mockMimeMessage).setHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
+		verify(mockMimeMessage).setHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
+		verify(mockMimeMessage, times(3)).setHeader(any(String.class), any(String.class));
 		verifyNoMoreInteractions(mockMimeMessage);
 	}
 
@@ -85,7 +85,7 @@ class EmailServiceTests {
 
 		service.addOptionalHeaders(mockMimeMessage, request);
 
-		verify(mockMimeMessage, never()).addHeader(any(String.class), any(String.class));
+		verify(mockMimeMessage, never()).setHeader(any(String.class), any(String.class));
 		verifyNoMoreInteractions(mockMimeMessage);
 	}
 }

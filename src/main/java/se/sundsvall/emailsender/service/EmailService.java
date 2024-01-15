@@ -157,8 +157,9 @@ public class EmailService {
 	void addOptionalHeaders(final MimeMessage message, final SendEmailRequest request) {
 		Optional.ofNullable(request.getHeaders()).ifPresent(headers ->
 			headers.forEach((header, values) -> {
+LOG.info("Attempting to set header '{}' with value(s) '{}'", header, formatHeader(values));
 				try {
-					message.addHeader(header.getHeaderName(), formatHeader(values));
+					message.setHeader(header.getHeaderName(), formatHeader(values));
 				} catch (final MessagingException e) {
 					LOG.error("Unable to set header", e);
 					throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Unable to set header");
