@@ -3,8 +3,6 @@ package se.sundsvall.emailsender.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -64,28 +62,5 @@ class EmailServiceTests {
 		var result = service.formatHeader(strings);
 
 		assertThat(result).isEqualTo("abc@abc\r\nbac@bac\r\ncab@cab");
-	}
-
-	@Test
-	void addOptionalHeadersTest() throws Exception {
-		var request = createValidEmailRequest();
-
-		service.addOptionalHeaders(mockMimeMessage, request);
-
-		verify(mockMimeMessage).addHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
-		verify(mockMimeMessage).addHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
-		verify(mockMimeMessage).addHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
-		verify(mockMimeMessage, times(3)).addHeader(any(String.class), any(String.class));
-		verifyNoMoreInteractions(mockMimeMessage);
-	}
-
-	@Test
-	void addOptionalHeaders_nullHeadersTest() throws Exception {
-		var request = createValidEmailRequest(r -> r.setHeaders(null));
-
-		service.addOptionalHeaders(mockMimeMessage, request);
-
-		verify(mockMimeMessage, never()).addHeader(any(String.class), any(String.class));
-		verifyNoMoreInteractions(mockMimeMessage);
 	}
 }

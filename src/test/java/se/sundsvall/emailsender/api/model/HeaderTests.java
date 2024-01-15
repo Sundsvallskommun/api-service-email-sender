@@ -16,9 +16,9 @@ class HeaderTests {
 
 	@Test
 	void enumValues() {
-		assertThat(IN_REPLY_TO.getHeaderName()).isEqualTo("In-Reply-To");
-		assertThat(REFERENCES.getHeaderName()).isEqualTo("References");
-		assertThat(MESSAGE_ID.getHeaderName()).isEqualTo("Message-ID");
+		assertThat(IN_REPLY_TO.getName()).isEqualTo("In-Reply-To");
+		assertThat(REFERENCES.getName()).isEqualTo("References");
+		assertThat(MESSAGE_ID.getName()).isEqualTo("Message-ID");
 	}
 }
 
