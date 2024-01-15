@@ -71,10 +71,13 @@ public class EmailService {
 
 		// Handle recipient
 		message.setRecipients(Message.RecipientType.TO, request.getEmailAddress());
+
 		// Handle subject
 		message.setSubject(request.getSubject(), UTF_8.name());
+
 		// Handle content and attachments
 		message.setContent(createMultiPart(request));
+
 		//Handle optional headers
 		addOptionalHeaders(message, request);
 
