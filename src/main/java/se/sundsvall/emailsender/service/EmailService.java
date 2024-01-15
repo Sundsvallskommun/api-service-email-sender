@@ -2,14 +2,15 @@ package se.sundsvall.emailsender.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.function.Failable.stream;
 import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.activation.DataHandler;
@@ -26,12 +27,9 @@ import jakarta.mail.internet.MimeUtility;
 import jakarta.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
 
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
@@ -39,7 +37,6 @@ import se.sundsvall.emailsender.api.model.SendEmailRequest;
 @Service
 public class EmailService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 	private static final ValidBase64ConstraintValidator BASE64_VALIDATOR = new ValidBase64ConstraintValidator();
 
 	private final JavaMailSender mailSender;
@@ -79,7 +76,8 @@ public class EmailService {
 		message.setContent(createMultiPart(request));
 
 		//Handle optional headers
-		addOptionalHeaders(message, request);
+		stream(ofNullable(request.getHeaders()).orElse(Map.of()).entrySet())
+			.forEach(header -> message.addHeader(header.getKey().getName(), formatHeader(header.getValue())));
 
 		return message;
 	}
@@ -157,15 +155,4 @@ public class EmailService {
 			.orElse("");
 	}
 
-	void addOptionalHeaders(final MimeMessage message, final SendEmailRequest request) {
-		Optional.ofNullable(request.getHeaders()).ifPresent(headers ->
-			headers.forEach((header, values) -> {
-				try {
-					message.addHeader(header.getHeaderName(), formatHeader(values));
-				} catch (final MessagingException e) {
-					LOG.error("Unable to set header", e);
-					throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Unable to set header");
-				}
-			}));
-	}
 }

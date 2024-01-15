@@ -10,9 +10,9 @@ public enum Header {
 	REFERENCES("References"),
 	MESSAGE_ID("Message-ID");
 
-	private final String headerName;
+	private final String name;
 
-	Header(final String headerName) {
-		this.headerName = headerName;
+	Header(final String name) {
+		this.name = name;
 	}
 }
