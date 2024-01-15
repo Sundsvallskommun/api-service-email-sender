@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import se.sundsvall.dept44.common.validators.annotation.ValidBase64;
+import se.sundsvall.emailsender.api.validation.ValidMessageId;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -23,6 +24,7 @@ import lombok.Setter;
 @Builder(setterPrefix = "with", toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Schema(description = "The request class for sending an e-mail")
 public class SendEmailRequest {
 
 	@Schema(description = "Recipient e-mail address", example = "recipient@recipient.se")
@@ -45,17 +47,17 @@ public class SendEmailRequest {
 	@NotNull
 	private Sender sender;
 
-	@Schema(description = "Attachments")
 	private List<@Valid Attachment> attachments;
 
 	@Schema(description = "Headers")
-	private Map<Header, List<String>> headers;
+	private Map<Header, List<@ValidMessageId String>> headers;
 
 	@Getter
 	@Setter
 	@Builder(setterPrefix = "with")
 	@NoArgsConstructor
 	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@Schema(description = "E-mail attachment")
 	public static class Attachment {
 
 		@Schema(description = "The attachment (file) content as a BASE64-encoded string", example = "aGVsbG8gd29ybGQK")
@@ -76,6 +78,7 @@ public class SendEmailRequest {
 	@Builder(setterPrefix = "with")
 	@NoArgsConstructor
 	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@Schema(description = "E-mail sender")
 	public static class Sender {
 
 		@NotBlank
