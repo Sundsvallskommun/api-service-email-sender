@@ -31,7 +31,7 @@ class ValidMessageIdConstraintValidatorTests {
 	private ConstraintValidatorContext mockContext;
 
 	@InjectMocks
-	private final ValidMessageIdConstraintValidator validator = new ValidMessageIdConstraintValidator();
+	private ValidMessageIdConstraintValidator validator;
 
 	private static Stream<Arguments> validArgumentsProvider() {
 		return Stream.of(

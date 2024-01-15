@@ -1,9 +1,11 @@
 package se.sundsvall.emailsender.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
 import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -24,9 +26,12 @@ import jakarta.mail.internet.MimeUtility;
 import jakarta.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
 
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
@@ -34,6 +39,7 @@ import se.sundsvall.emailsender.api.model.SendEmailRequest;
 @Service
 public class EmailService {
 
+	private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 	private static final ValidBase64ConstraintValidator BASE64_VALIDATOR = new ValidBase64ConstraintValidator();
 
 	private final JavaMailSender mailSender;
@@ -58,7 +64,7 @@ public class EmailService {
 		message.setFrom(sender);
 
 		// Handle reply-to - if no reply-to address is set, use the sender address
-		final var replyTo = Optional.ofNullable(request.getSender().getReplyTo())
+		final var replyTo = ofNullable(request.getSender().getReplyTo())
 			.filter(StringUtils::isNotBlank)
 			.orElseGet(() -> request.getSender().getAddress());
 		message.setReplyTo(InternetAddress.parse(replyTo));
@@ -94,7 +100,7 @@ public class EmailService {
 		}
 
 		// Handle attachments
-		for (final var attachment : Optional.ofNullable(request.getAttachments()).orElse(List.of())) {
+		for (final var attachment : ofNullable(request.getAttachments()).orElse(List.of())) {
 			if (!BASE64_VALIDATOR.isValid(attachment.getContent())) {
 				continue;
 			}
@@ -148,16 +154,15 @@ public class EmailService {
 			.orElse("");
 	}
 
-	void applyCustomHeaders(final MimeMessage message, final SendEmailRequest request) throws MessagingException {
-		if (request.getHeaders() == null) {
-			return;
-		}
-		for (var header : request.getHeaders().entrySet()) {
-			var headerName = header.getKey().getHeaderName();
-			var headerValue = formatHeader(header.getValue());
-			if (!headerValue.isBlank()) {
-				message.setHeader(headerName, headerValue);
-			}
-		}
+	void applyCustomHeaders(final MimeMessage message, final SendEmailRequest request) {
+		Optional.ofNullable(request.getHeaders()).ifPresent(headers ->
+			headers.forEach((header, values) -> {
+				try {
+					message.setHeader(header.getHeaderName(), formatHeader(values));
+				} catch (final MessagingException e) {
+					LOG.error("Unable to set header", e);
+					throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Unable to set header");
+				}
+			}));
 	}
 }
