@@ -39,7 +39,7 @@ paths:
               schema:
                 oneOf:
                 - $ref: '#/components/schemas/Problem'
-                - $ref: '#/components/schemas/ConstraintViolation'
+                - $ref: '#/components/schemas/ConstraintViolationProblem'
         "200":
           description: Successful Operation
   /api-docs:
@@ -103,7 +103,6 @@ components:
           $ref: '#/components/schemas/Sender'
         attachments:
           type: array
-          description: Attachments
           items:
             $ref: '#/components/schemas/Attachment'
         headers:
@@ -115,7 +114,7 @@ components:
               type: string
               description: Headers
           description: Headers
-      description: Send e-mail request
+      description: The request class for sending an e-mail
     Sender:
       required:
       - address
@@ -161,59 +160,171 @@ components:
           format: int32
         reasonPhrase:
           type: string
-    ConstraintDescriptorObject:
+    ConstraintViolationProblem:
       type: object
       properties:
-        annotation:
-          type: object
-        attributes:
+        cause:
+          $ref: '#/components/schemas/ThrowableProblem'
+        stackTrace:
+          type: array
+          items:
+            type: object
+            properties:
+              classLoaderName:
+                type: string
+              moduleName:
+                type: string
+              moduleVersion:
+                type: string
+              methodName:
+                type: string
+              fileName:
+                type: string
+              lineNumber:
+                type: integer
+                format: int32
+              className:
+                type: string
+              nativeMethod:
+                type: boolean
+        type:
+          type: string
+          format: uri
+        status:
+          $ref: '#/components/schemas/StatusType'
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        title:
+          type: string
+        message:
+          type: string
+        instance:
+          type: string
+          format: uri
+        parameters:
           type: object
           additionalProperties:
             type: object
-        reportAsSingleViolation:
-          type: boolean
-        validationAppliesTo:
+        detail:
           type: string
-          enum:
-          - IMPLICIT
-          - RETURN_VALUE
-          - PARAMETERS
-        composingConstraints:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ConstraintDescriptorObject'
-        valueUnwrapping:
-          type: string
-          enum:
-          - DEFAULT
-          - UNWRAP
-          - SKIP
-        messageTemplate:
-          type: string
-    ConstraintViolation:
-      type: object
-      properties:
-        message:
-          type: string
-        messageTemplate:
-          type: string
-        propertyPath:
-          $ref: '#/components/schemas/Path'
-        rootBean:
-          type: object
-        constraintDescriptor:
-          $ref: '#/components/schemas/ConstraintDescriptorObject'
-        invalidValue:
-          type: object
-        leafBean:
-          type: object
-        executableReturnValue:
-          type: object
-        executableParameters:
+        suppressed:
           type: array
           items:
             type: object
-    Path:
+            properties:
+              stackTrace:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    classLoaderName:
+                      type: string
+                    moduleName:
+                      type: string
+                    moduleVersion:
+                      type: string
+                    methodName:
+                      type: string
+                    fileName:
+                      type: string
+                    lineNumber:
+                      type: integer
+                      format: int32
+                    className:
+                      type: string
+                    nativeMethod:
+                      type: boolean
+              message:
+                type: string
+              localizedMessage:
+                type: string
+        localizedMessage:
+          type: string
+    ThrowableProblem:
       type: object
+      properties:
+        cause:
+          $ref: '#/components/schemas/ThrowableProblem'
+        stackTrace:
+          type: array
+          items:
+            type: object
+            properties:
+              classLoaderName:
+                type: string
+              moduleName:
+                type: string
+              moduleVersion:
+                type: string
+              methodName:
+                type: string
+              fileName:
+                type: string
+              lineNumber:
+                type: integer
+                format: int32
+              className:
+                type: string
+              nativeMethod:
+                type: boolean
+        message:
+          type: string
+        instance:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+        status:
+          $ref: '#/components/schemas/StatusType'
+        detail:
+          type: string
+        title:
+          type: string
+        suppressed:
+          type: array
+          items:
+            type: object
+            properties:
+              stackTrace:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    classLoaderName:
+                      type: string
+                    moduleName:
+                      type: string
+                    moduleVersion:
+                      type: string
+                    methodName:
+                      type: string
+                    fileName:
+                      type: string
+                    lineNumber:
+                      type: integer
+                      format: int32
+                    className:
+                      type: string
+                    nativeMethod:
+                      type: boolean
+              message:
+                type: string
+              localizedMessage:
+                type: string
+        localizedMessage:
+          type: string
+    Violation:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
   securitySchemes: {}

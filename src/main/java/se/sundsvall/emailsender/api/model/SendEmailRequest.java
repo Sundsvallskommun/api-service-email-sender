@@ -24,7 +24,7 @@ import lombok.Setter;
 @Builder(setterPrefix = "with", toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Schema(description = "Send e-mail request")
+@Schema(description = "The request class for sending an e-mail")
 public class SendEmailRequest {
 
 	@Schema(description = "Recipient e-mail address", example = "recipient@recipient.se")
@@ -43,12 +43,10 @@ public class SendEmailRequest {
 	@ValidBase64(nullable = true)
 	private String htmlMessage;
 
-	@Schema(description = "Sender")
 	@Valid
 	@NotNull
 	private Sender sender;
 
-	@Schema(description = "Attachments")
 	private List<@Valid Attachment> attachments;
 
 	@Schema(description = "Headers")

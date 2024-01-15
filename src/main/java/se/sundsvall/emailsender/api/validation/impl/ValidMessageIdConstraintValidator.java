@@ -9,6 +9,9 @@ public class ValidMessageIdConstraintValidator implements ConstraintValidator<Va
 
 	@Override
 	public boolean isValid(final String value, final ConstraintValidatorContext context) {
+		if (value == null) {
+			return false;
+		}
 		return value.startsWith("<") && value.endsWith(">") && value.contains("@");
 	}
 
