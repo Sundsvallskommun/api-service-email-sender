@@ -52,11 +52,10 @@ public class EmailService {
 		final var message = mailSender.createMimeMessage();
 
 		// Handle sender (NAME <ADDRESS>)
-		final var sender = new StringBuilder()
-			.append(encode(request.getSender().getName()))
-			.append(" ")
-			.append("<").append(request.getSender().getAddress()).append(">");
-		message.setFrom(sender.toString());
+		String sender = encode(request.getSender().getName()) +
+			" " +
+			"<" + request.getSender().getAddress() + ">";
+		message.setFrom(sender);
 
 		// Handle reply-to - if no reply-to address is set, use the sender address
 		final var replyTo = Optional.ofNullable(request.getSender().getReplyTo())
@@ -70,6 +69,8 @@ public class EmailService {
 		message.setSubject(request.getSubject(), UTF_8.name());
 		// Handle content and attachments
 		message.setContent(createMultiPart(request));
+		//Handle optional headers
+		applyCustomHeaders(message, request);
 
 		return message;
 	}
@@ -131,6 +132,32 @@ public class EmailService {
 			return Optional.of(new String(Base64.getDecoder().decode(s), UTF_8));
 		} catch (final IllegalArgumentException e) {
 			return Optional.empty();
+		}
+	}
+
+	/**
+	 * RFC5322 states that Message-ID's should be separated by CRLF,
+	 * this method formats a list of values using \r\n to fulfil the requirements.
+	 *
+	 * @param values The list of strings
+	 * @return The formatted string
+	 */
+	String formatHeader(final List<String> values) {
+		return values.stream()
+			.reduce((a, b) -> a + "\r\n" + b)
+			.orElse("");
+	}
+
+	void applyCustomHeaders(final MimeMessage message, final SendEmailRequest request) throws MessagingException {
+		if (request.getHeaders() == null) {
+			return;
+		}
+		for (var header : request.getHeaders().entrySet()) {
+			var headerName = header.getKey().getHeaderName();
+			var headerValue = formatHeader(header.getValue());
+			if (!headerValue.isBlank()) {
+				message.setHeader(headerName, headerValue);
+			}
 		}
 	}
 }

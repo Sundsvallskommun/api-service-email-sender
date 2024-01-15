@@ -5,15 +5,18 @@ info:
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: "1.0"
+  version: "1.1"
 servers:
 - url: http://localhost:8080
   description: Generated server url
+tags:
+- name: Email resources
+  description: Resources for sending emails
 paths:
   /send/email:
     post:
       tags:
-      - email-resource
+      - Email resources
       summary: Send an e-mail
       operationId: sendMail
       requestBody:
@@ -29,14 +32,16 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Problem'
-        "200":
-          description: Successful Operation
         "400":
           description: Bad Request
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Problem'
+                oneOf:
+                - $ref: '#/components/schemas/Problem'
+                - $ref: '#/components/schemas/ConstraintViolation'
+        "200":
+          description: Successful Operation
   /api-docs:
     get:
       tags:
@@ -73,7 +78,7 @@ components:
           type: string
           description: The attachment content type
           example: text/plain
-      description: Attachments
+      description: E-mail attachment
     SendEmailRequest:
       required:
       - emailAddress
@@ -110,6 +115,7 @@ components:
               type: string
               description: Headers
           description: Headers
+      description: Send e-mail request
     Sender:
       required:
       - address
@@ -127,6 +133,7 @@ components:
           type: string
           description: Reply-to e-mail address
           example: sender@sender.se
+      description: E-mail sender
     Problem:
       type: object
       properties:
@@ -154,4 +161,59 @@ components:
           format: int32
         reasonPhrase:
           type: string
+    ConstraintDescriptorObject:
+      type: object
+      properties:
+        annotation:
+          type: object
+        attributes:
+          type: object
+          additionalProperties:
+            type: object
+        reportAsSingleViolation:
+          type: boolean
+        validationAppliesTo:
+          type: string
+          enum:
+          - IMPLICIT
+          - RETURN_VALUE
+          - PARAMETERS
+        composingConstraints:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ConstraintDescriptorObject'
+        valueUnwrapping:
+          type: string
+          enum:
+          - DEFAULT
+          - UNWRAP
+          - SKIP
+        messageTemplate:
+          type: string
+    ConstraintViolation:
+      type: object
+      properties:
+        message:
+          type: string
+        messageTemplate:
+          type: string
+        propertyPath:
+          $ref: '#/components/schemas/Path'
+        rootBean:
+          type: object
+        constraintDescriptor:
+          $ref: '#/components/schemas/ConstraintDescriptorObject'
+        invalidValue:
+          type: object
+        leafBean:
+          type: object
+        executableReturnValue:
+          type: object
+        executableParameters:
+          type: array
+          items:
+            type: object
+    Path:
+      type: object
   securitySchemes: {}

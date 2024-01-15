@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("junit")
-class EmailRequestValidationTests {
+class SendEmailRequestValidationTests {
 
 	private Validator validator;
 
