@@ -70,7 +70,7 @@ class EmailServiceTests {
 	void applyCustomHeadersTest() throws Exception {
 		var request = createValidEmailRequest();
 
-		service.applyCustomHeaders(mockMimeMessage, request);
+		service.addOptionalHeaders(mockMimeMessage, request);
 
 		verify(mockMimeMessage).setHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
 		verify(mockMimeMessage).setHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
@@ -83,7 +83,7 @@ class EmailServiceTests {
 	void applyCustomHeaders_nullHeadersTest() throws Exception {
 		var request = createValidEmailRequest(r -> r.setHeaders(null));
 
-		service.applyCustomHeaders(mockMimeMessage, request);
+		service.addOptionalHeaders(mockMimeMessage, request);
 
 		verify(mockMimeMessage, never()).setHeader(any(String.class), any(String.class));
 		verifyNoMoreInteractions(mockMimeMessage);

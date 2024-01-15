@@ -76,7 +76,7 @@ public class EmailService {
 		// Handle content and attachments
 		message.setContent(createMultiPart(request));
 		//Handle optional headers
-		applyCustomHeaders(message, request);
+		addOptionalHeaders(message, request);
 
 		return message;
 	}
@@ -154,11 +154,11 @@ public class EmailService {
 			.orElse("");
 	}
 
-	void applyCustomHeaders(final MimeMessage message, final SendEmailRequest request) {
+	void addOptionalHeaders(final MimeMessage message, final SendEmailRequest request) {
 		Optional.ofNullable(request.getHeaders()).ifPresent(headers ->
 			headers.forEach((header, values) -> {
 				try {
-					message.setHeader(header.getHeaderName(), formatHeader(values));
+					message.addHeader(header.getHeaderName(), formatHeader(values));
 				} catch (final MessagingException e) {
 					LOG.error("Unable to set header", e);
 					throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Unable to set header");
