@@ -142,17 +142,9 @@ public class EmailService {
 		}
 	}
 
-	/**
-	 * RFC5322 states that Message-ID's should be separated by CRLF,
-	 * this method formats a list of values using \r\n to fulfil the requirements.
-	 *
-	 * @param values The list of strings
-	 * @return The formatted string
-	 */
 	String formatHeader(final List<String> values) {
 		return values.stream()
-			.reduce((a, b) -> a + "\r\n" + b)
+			.reduce((a, b) -> a + " " + b)
 			.orElse("");
 	}
-
 }
