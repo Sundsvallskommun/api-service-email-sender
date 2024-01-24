@@ -57,10 +57,10 @@ class EmailServiceTests {
 
 	@Test
 	void formatHeaderTest() {
-		List<String> strings = List.of("abc@abc", "bac@bac", "cab@cab");
+		List<String> strings = List.of("<abc@abc>", "<bac@bac>", "<cab@cab>");
 
 		var result = service.formatHeader(strings);
 
-		assertThat(result).isEqualTo("abc@abc\r\nbac@bac\r\ncab@cab");
+		assertThat(result).isEqualTo("<abc@abc> <bac@bac> <cab@cab>");
 	}
 }
