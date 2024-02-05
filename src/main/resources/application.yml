@@ -2,7 +2,11 @@
 spring:
   application:
     name: api-email-sender
-
+logbook:
+  body-filters:
+    json-path:
+      - key: "['file','content']"
+        value: '[base64]'
 # OpenAPI
 openapi:
   name: api-service-email-sender
