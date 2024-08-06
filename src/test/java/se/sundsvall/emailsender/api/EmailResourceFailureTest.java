@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.zalando.problem.Status.BAD_REQUEST;
 import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
 import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,7 +34,9 @@ import se.sundsvall.emailsender.service.EmailService;
 @ActiveProfiles("junit")
 class EmailResourceFailureTest {
 
-	private static final String PATH = "/2281/send/email";
+	private static final String MUNICIPALITY_ID = "2281";
+
+	private static final String PATH = "/" + MUNICIPALITY_ID + "/send/email";
 
 	@Autowired
 	private WebTestClient webTestClient;
@@ -92,6 +96,29 @@ class EmailResourceFailureTest {
 		});
 
 		verifyNoInteractions(mockService);
+	}
+
+	@Test
+	void sendMailFaultyMunicipalityId() {
+		// Arrange
+		final var request = createValidEmailRequest();
+
+		// Act
+		final var response = webTestClient.post().uri(PATH.replace(MUNICIPALITY_ID, "22-81")).contentType(APPLICATION_JSON)
+			.bodyValue(request)
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		// Assert
+		assertThat(response).isNotNull();
+		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
+		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
+		assertThat(response.getViolations())
+			.extracting(Violation::getField, Violation::getMessage)
+			.containsExactly(Tuple.tuple("sendMail.municipalityId", "not a valid municipality ID"));
 	}
 
 }
