@@ -32,6 +32,8 @@ import se.sundsvall.emailsender.service.EmailService;
 @ActiveProfiles("junit")
 class EmailResourceFailureTest {
 
+	private static final String PATH = "/2281/send/email";
+
 	@Autowired
 	private WebTestClient webTestClient;
 
@@ -51,8 +53,8 @@ class EmailResourceFailureTest {
 	@ParameterizedTest
 	@MethodSource("invalidRequestsProvider")
 	void sendMailWithInvalidRequestTest(final SendEmailRequest request, final String badArgument, final String expectedMessage) {
-		var response = webTestClient.post()
-			.uri(builder -> builder.path("/send/email").build())
+		final var response = webTestClient.post()
+			.uri(builder -> builder.path(PATH).build())
 			.bodyValue(request)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -73,8 +75,8 @@ class EmailResourceFailureTest {
 	void sendMailWithInvalidHeadersTest() {
 		final var request = createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID, List.of("This is invalid"))));
 
-		var response = webTestClient.post()
-			.uri(builder -> builder.path("/send/email").build())
+		final var response = webTestClient.post()
+			.uri(builder -> builder.path(PATH).build())
 			.bodyValue(request)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -91,4 +93,5 @@ class EmailResourceFailureTest {
 
 		verifyNoInteractions(mockService);
 	}
+
 }
