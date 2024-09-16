@@ -5,7 +5,7 @@ spring:
 logbook:
   body-filters:
     json-path:
-      - key: "['file','content']"
+      - key: "['$.attachments..content']"
         value: '[base64]'
 # OpenAPI
 openapi:
