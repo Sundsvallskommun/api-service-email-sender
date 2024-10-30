@@ -75,7 +75,7 @@ public class EmailService {
 		// Handle content and attachments
 		message.setContent(createMultiPart(request));
 
-		//Handle optional headers
+		// Handle optional headers
 		stream(ofNullable(request.getHeaders()).orElse(Map.of()).entrySet())
 			.forEach(header -> message.addHeader(header.getKey().getName(), formatHeader(header.getValue())));
 

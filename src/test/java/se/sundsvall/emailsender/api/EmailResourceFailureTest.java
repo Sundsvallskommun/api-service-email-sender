@@ -49,10 +49,8 @@ class EmailResourceFailureTest {
 			Arguments.of(createValidEmailRequest(r -> r.setEmailAddress("Not a valid email")), "emailAddress", "must be a well-formed email address"),
 			Arguments.of(createValidEmailRequest(r -> r.setSubject("")), "subject", "must not be blank"),
 			Arguments.of(createValidEmailRequest(r -> r.setHtmlMessage("Not base64")), "htmlMessage", "not a valid BASE64-encoded string"),
-			Arguments.of(createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID, List.of("")))), "headers[MESSAGE_ID][0]", "text is not valid message id format")
-		);
+			Arguments.of(createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID, List.of("")))), "headers[MESSAGE_ID][0]", "text is not valid message id format"));
 	}
-
 
 	@ParameterizedTest
 	@MethodSource("invalidRequestsProvider")

@@ -12,7 +12,9 @@ import jakarta.validation.Payload;
 import se.sundsvall.emailsender.api.validation.impl.ValidMessageIdConstraintValidator;
 
 @Documented
-@Target({ElementType.TYPE_USE})
+@Target({
+	ElementType.TYPE_USE
+})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = ValidMessageIdConstraintValidator.class)
 public @interface ValidMessageId {

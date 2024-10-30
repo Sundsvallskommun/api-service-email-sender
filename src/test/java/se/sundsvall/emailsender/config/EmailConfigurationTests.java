@@ -13,12 +13,12 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = EmailConfiguration.class)
 class EmailConfigurationTests {
 
-    @Autowired
-    @Qualifier("integration.email.mail-sender")
-    private JavaMailSender mailSender;
+	@Autowired
+	@Qualifier("integration.email.mail-sender")
+	private JavaMailSender mailSender;
 
-    @Test
-    void mailSenderBean_isNotNull() {
-        assertThat(mailSender).isNotNull();
-    }
+	@Test
+	void mailSenderBean_isNotNull() {
+		assertThat(mailSender).isNotNull();
+	}
 }

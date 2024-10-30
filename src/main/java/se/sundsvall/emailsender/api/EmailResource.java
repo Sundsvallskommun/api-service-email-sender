@@ -44,7 +44,9 @@ class EmailResource {
 	@ApiResponse(
 		responseCode = "400",
 		description = "Bad Request",
-		content = @Content(schema = @Schema(oneOf = {Problem.class, ConstraintViolationProblem.class})))
+		content = @Content(schema = @Schema(oneOf = {
+			Problem.class, ConstraintViolationProblem.class
+		})))
 	@ApiResponse(
 		responseCode = "500",
 		description = "Internal Server Error",
