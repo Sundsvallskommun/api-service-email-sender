@@ -21,4 +21,3 @@ class HeaderTests {
 		assertThat(MESSAGE_ID.getName()).isEqualTo("Message-ID");
 	}
 }
-
