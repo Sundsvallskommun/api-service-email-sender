@@ -5,12 +5,10 @@ import static se.sundsvall.emailsender.api.model.Header.IN_REPLY_TO;
 import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 import static se.sundsvall.emailsender.api.model.Header.REFERENCES;
 
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import jakarta.validation.ConstraintValidatorContext;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +18,6 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.validation.impl.ValidMessageIdConstraintValidator;
 

@@ -12,7 +12,6 @@ import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.zalando.problem.violations.ConstraintViolationProblem;
 import org.zalando.problem.violations.Violation;
-
 import se.sundsvall.emailsender.Application;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.service.EmailService;
