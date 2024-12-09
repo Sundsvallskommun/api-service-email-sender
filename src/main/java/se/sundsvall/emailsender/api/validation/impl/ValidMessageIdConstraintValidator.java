@@ -2,7 +2,6 @@ package se.sundsvall.emailsender.api.validation.impl;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import se.sundsvall.emailsender.api.validation.ValidMessageId;
 
 public class ValidMessageIdConstraintValidator implements ConstraintValidator<ValidMessageId, String> {

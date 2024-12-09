@@ -8,7 +8,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 public final class TestDataFactory {

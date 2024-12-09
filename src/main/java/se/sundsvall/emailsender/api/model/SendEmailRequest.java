@@ -1,23 +1,20 @@
 package se.sundsvall.emailsender.api.model;
 
-import java.util.List;
-import java.util.Map;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import se.sundsvall.dept44.common.validators.annotation.ValidBase64;
-import se.sundsvall.emailsender.api.validation.ValidMessageId;
-
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import se.sundsvall.dept44.common.validators.annotation.ValidBase64;
+import se.sundsvall.emailsender.api.validation.ValidMessageId;
 
 @Getter
 @Setter

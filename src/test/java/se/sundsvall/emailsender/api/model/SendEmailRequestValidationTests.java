@@ -5,12 +5,10 @@ import static se.sundsvall.emailsender.TestDataFactory.createValidAttachment;
 import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
 import static se.sundsvall.emailsender.TestDataFactory.createValidSender;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

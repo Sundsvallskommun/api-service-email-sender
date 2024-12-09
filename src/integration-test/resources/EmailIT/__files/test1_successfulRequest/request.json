@@ -1,11 +1,17 @@
 {
-	"headers": {"MESSAGE_ID": ["<0d151193@113c2234d334>"]},
+	"headers": {
+		"MESSAGE_ID": [
+			"<0d151193@113c2234d334>"
+		]
+	},
 	"emailAddress": "recipient@somehost.com",
-	"attachments": [{
-		"name": "myattachment.txt",
-		"contentType": "text/plain",
-		"content": "dGhpcyBpcyBhbiBhdHRhY2htZW50"
-	}],
+	"attachments": [
+		{
+			"name": "myattachment.txt",
+			"contentType": "text/plain",
+			"content": "dGhpcyBpcyBhbiBhdHRhY2htZW50"
+		}
+	],
 	"sender": {
 		"address": "customerservice@somedummyhost.com",
 		"name": "Customer Service",

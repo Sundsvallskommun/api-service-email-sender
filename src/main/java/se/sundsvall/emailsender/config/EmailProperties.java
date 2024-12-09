@@ -2,13 +2,11 @@ package se.sundsvall.emailsender.config;
 
 import static java.util.Optional.ofNullable;
 
+import jakarta.validation.constraints.NotBlank;
 import java.util.Properties;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.validation.annotation.Validated;
-
-import jakarta.validation.constraints.NotBlank;
 
 @Validated
 @ConfigurationProperties(prefix = "integration.email")
