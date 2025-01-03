@@ -33,22 +33,23 @@ class EmailResource {
 		this.service = service;
 	}
 
-	@Operation(summary = "Send an e-mail")
-	@ApiResponse(
-		responseCode = "200",
-		description = "Successful Operation",
-		useReturnTypeSchema = true)
-	@ApiResponse(
-		responseCode = "400",
-		description = "Bad Request",
-		content = @Content(schema = @Schema(oneOf = {
-			Problem.class, ConstraintViolationProblem.class
-		})))
-	@ApiResponse(
-		responseCode = "500",
-		description = "Internal Server Error",
-		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@PostMapping("{municipalityId}/send/email")
+	@Operation(summary = "Send an e-mail", responses = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Successful Operation",
+			useReturnTypeSchema = true),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Bad Request",
+			content = @Content(schema = @Schema(oneOf = {
+				Problem.class, ConstraintViolationProblem.class
+			}))),
+		@ApiResponse(
+			responseCode = "500",
+			description = "Internal Server Error",
+			content = @Content(schema = @Schema(implementation = Problem.class)))
+	})
 	ResponseEntity<Void> sendMail(
 		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final SendEmailRequest request) throws MessagingException {
@@ -57,5 +58,4 @@ class EmailResource {
 
 		return ok().build();
 	}
-
 }
