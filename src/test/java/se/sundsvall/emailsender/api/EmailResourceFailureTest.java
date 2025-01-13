@@ -47,7 +47,7 @@ class EmailResourceFailureTest {
 			Arguments.of(createValidEmailRequest(r -> r.setEmailAddress("Not a valid email")), "emailAddress", "must be a well-formed email address"),
 			Arguments.of(createValidEmailRequest(r -> r.setSubject("")), "subject", "must not be blank"),
 			Arguments.of(createValidEmailRequest(r -> r.setHtmlMessage("Not base64")), "htmlMessage", "not a valid BASE64-encoded string"),
-			Arguments.of(createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID, List.of("")))), "headers[MESSAGE_ID][0]", "text is not valid message id format"));
+			Arguments.of(createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID.getKey(), List.of("")))), "headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
 	}
 
 	@ParameterizedTest
@@ -73,7 +73,7 @@ class EmailResourceFailureTest {
 
 	@Test
 	void sendMailWithInvalidHeadersTest() {
-		final var request = createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID, List.of("This is invalid"))));
+		final var request = createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID.getKey(), List.of("This is invalid"))));
 
 		final var response = webTestClient.post()
 			.uri(builder -> builder.path(PATH).build())
@@ -88,7 +88,7 @@ class EmailResourceFailureTest {
 			assertThat(r.getTitle()).isEqualTo("Constraint Violation");
 			assertThat(r.getStatus()).isEqualTo(BAD_REQUEST);
 			assertThat(r.getViolations()).extracting(Violation::getField, Violation::getMessage)
-				.containsExactlyInAnyOrder(tuple("headers[MESSAGE_ID][0]", "text is not valid message id format"));
+				.containsExactlyInAnyOrder(tuple("headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
 		});
 
 		verifyNoInteractions(mockService);
