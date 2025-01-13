@@ -1,5 +1,6 @@
 package se.sundsvall.emailsender;
 
+import static se.sundsvall.emailsender.api.model.Header.AUTO_SUBMITTED;
 import static se.sundsvall.emailsender.api.model.Header.IN_REPLY_TO;
 import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 import static se.sundsvall.emailsender.api.model.Header.REFERENCES;
@@ -38,9 +39,10 @@ public final class TestDataFactory {
 			.withHtmlMessage("htmlMessage")
 			.withSender(sender)
 			.withHeaders(Map.of(
-				MESSAGE_ID, List.of("<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>"),
-				IN_REPLY_TO, List.of("<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>"),
-				REFERENCES, List.of("<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>")))
+				MESSAGE_ID.getKey(), List.of("<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>"),
+				IN_REPLY_TO.getKey(), List.of("<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>"),
+				REFERENCES.getKey(), List.of("<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>"),
+				AUTO_SUBMITTED.getKey(), List.of("auto-generated")))
 			.withAttachments(List.of(attachment))
 			.build();
 

@@ -14,7 +14,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import se.sundsvall.dept44.test.AbstractAppTest;
 import se.sundsvall.dept44.test.annotation.resource.Load;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
@@ -27,6 +26,7 @@ import se.sundsvall.emailsender.Application;
 class EmailIT extends AbstractAppTest {
 
 	private static final String SERVICE_PATH = "/2281/send/email";
+	private static final String REQUEST_FILE = "request.json";
 
 	@Container
 	static GenericContainer<?> mailpitContainer = new GenericContainer<>("axllent/mailpit:v1.15")
@@ -53,7 +53,7 @@ class EmailIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(SERVICE_PATH)
 			.withHttpMethod(POST)
-			.withRequest("request.json")
+			.withRequest(REQUEST_FILE)
 			.withExpectedResponseStatus(OK)
 			.sendRequestAndVerifyResponse();
 
@@ -64,7 +64,7 @@ class EmailIT extends AbstractAppTest {
 			.exchange()
 			.expectBody()
 			.jsonPath("$.total").isEqualTo(1)
-			.jsonPath("$.messages[0].MessageID").isEqualTo(jsonPath.read("$.headers.MESSAGE_ID[0]", String.class).replace("<", "").replace(">", ""))
+			.jsonPath("$.messages[0].MessageID").isEqualTo(jsonPath.read("$.headers.Message-ID[0]", String.class).replace("<", "").replace(">", ""))
 			.jsonPath("$.messages[0].Subject").isEqualTo(jsonPath.read("$.subject"))
 			.jsonPath("$.messages[0].From.Name").isEqualTo(jsonPath.read("$.sender.name"))
 			.jsonPath("$.messages[0].From.Address").isEqualTo(jsonPath.read("$.sender.address"))

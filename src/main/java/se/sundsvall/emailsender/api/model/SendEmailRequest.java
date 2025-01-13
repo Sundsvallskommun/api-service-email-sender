@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import se.sundsvall.dept44.common.validators.annotation.ValidBase64;
-import se.sundsvall.emailsender.api.validation.ValidMessageId;
+import se.sundsvall.emailsender.api.validation.ValidHeaders;
 
 @Getter
 @Setter
@@ -47,7 +48,7 @@ public class SendEmailRequest {
 	private List<@Valid Attachment> attachments;
 
 	@Schema(description = "Headers")
-	private Map<Header, List<@ValidMessageId String>> headers;
+	private @ValidHeaders Map<@NotBlank String, @NotEmpty List<String>> headers;
 
 	@Getter
 	@Setter

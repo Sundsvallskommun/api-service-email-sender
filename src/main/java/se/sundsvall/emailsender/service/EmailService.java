@@ -74,7 +74,7 @@ public class EmailService {
 
 		// Handle optional headers
 		stream(ofNullable(request.getHeaders()).orElse(Map.of()).entrySet())
-			.forEach(header -> message.addHeader(header.getKey().getName(), formatHeader(header.getValue())));
+			.forEach(header -> message.addHeader(header.getKey(), formatHeader(header.getValue())));
 
 		return message;
 	}

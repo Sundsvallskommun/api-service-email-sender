@@ -50,6 +50,7 @@ class EmailServiceTests {
 		verify(mockMimeMessage).addHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
 		verify(mockMimeMessage).addHeader("References", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
 		verify(mockMimeMessage).addHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
+		verify(mockMimeMessage).addHeader("Auto-Submitted", "auto-generated");
 		verifyNoMoreInteractions(mockMimeMessage);
 	}
 

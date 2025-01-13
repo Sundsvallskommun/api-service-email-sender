@@ -7,19 +7,19 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import se.sundsvall.emailsender.api.validation.impl.ValidMessageIdConstraintValidator;
+import se.sundsvall.emailsender.api.validation.impl.ValidHeadersConstraintValidator;
 
 @Documented
 @Target({
-	ElementType.TYPE_USE
+	ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE
 })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ValidMessageIdConstraintValidator.class)
-public @interface ValidMessageId {
-
-	String message() default "text is not valid message id format";
+@Constraint(validatedBy = ValidHeadersConstraintValidator.class)
+public @interface ValidHeaders {
+	String message() default "is not a valid header";
 
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
+
 }
