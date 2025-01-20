@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
+import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 @Service
@@ -74,7 +75,9 @@ public class EmailService {
 
 		// Handle optional headers
 		stream(ofNullable(request.getHeaders()).orElse(Map.of()).entrySet())
-			.forEach(header -> message.addHeader(header.getKey(), formatHeader(header.getValue())));
+			.forEach(header -> message.addHeader(
+				Header.fromString(header.getKey()).getKey(),
+				formatHeader(header.getValue())));
 
 		return message;
 	}
