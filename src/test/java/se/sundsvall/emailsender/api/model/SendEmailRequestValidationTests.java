@@ -26,8 +26,8 @@ class SendEmailRequestValidationTests {
 
 	@Test
 	void validationWithValidRequest() {
-		final var request = createValidEmailRequest();
-		final var constraintViolations = validator.validate(request);
+		var request = createValidEmailRequest();
+		var constraintViolations = validator.validate(request);
 
 		assertThat(constraintViolations).isEmpty();
 	}
@@ -35,8 +35,7 @@ class SendEmailRequestValidationTests {
 	@ParameterizedTest
 	@MethodSource("getSendEmailRequestValidationArguments")
 	void testSendEmailRequestValidation(final SendEmailRequest request, final String constraintField, final String constraintMessage) {
-
-		final var constraintViolations = List.copyOf(validator.validate(request));
+		var constraintViolations = List.copyOf(validator.validate(request));
 
 		assertThat(constraintViolations).hasSize(1);
 		assertThat(constraintViolations.getFirst().getPropertyPath()).hasToString(constraintField);
@@ -46,8 +45,7 @@ class SendEmailRequestValidationTests {
 	@ParameterizedTest
 	@MethodSource("getSendEmailRequestSenderValidationArguments")
 	void testSendEmailRequestSenderValidation(final SendEmailRequest.Sender sender, final String constraintField, final String constraintMessage) {
-
-		final var constraintViolations = List.copyOf(validator.validate(sender));
+		var constraintViolations = List.copyOf(validator.validate(sender));
 
 		assertThat(constraintViolations).hasSize(1);
 		assertThat(constraintViolations.getFirst().getPropertyPath()).hasToString(constraintField);
@@ -57,8 +55,7 @@ class SendEmailRequestValidationTests {
 	@ParameterizedTest
 	@MethodSource("getSendEmailRequestAttachmentValidationArguments")
 	void testSendEmailRequestAttachmentValidation(final SendEmailRequest.Attachment attachment, final String constraintField, final String constraintMessage) {
-
-		final var constraintViolations = List.copyOf(validator.validate(attachment));
+		var constraintViolations = List.copyOf(validator.validate(attachment));
 
 		assertThat(constraintViolations).hasSize(1);
 		assertThat(constraintViolations.getFirst().getPropertyPath()).hasToString(constraintField);
@@ -66,45 +63,53 @@ class SendEmailRequestValidationTests {
 	}
 
 	private static Stream<Arguments> getSendEmailRequestValidationArguments() {
-		return Stream.of(
+		var validEmailRequest = createValidEmailRequest();
 
+		return Stream.of(
 			// Validate recipient email address.
-			Arguments.of(createValidEmailRequest(req -> req.setEmailAddress(null)), "emailAddress", "must not be blank"),
-			Arguments.of(createValidEmailRequest(req -> req.setEmailAddress("")), "emailAddress", "must not be blank"),
-			Arguments.of(createValidEmailRequest(req -> req.setEmailAddress("kalle")), "emailAddress", "must be a well-formed email address"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress(null).build(), "emailAddress", "must not be blank"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress("").build(), "emailAddress", "must not be blank"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress("kalle").build(), "emailAddress", "must be a well-formed email address"),
 
 			// Validate sender email address.
-			Arguments.of(createValidEmailRequest(req -> req.getSender().setAddress("not-an-email-address")), "sender.address", "must be a well-formed email address"),
-			Arguments.of(createValidEmailRequest(req -> req.setSender(null)), "sender", "must not be null"));
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest)
+				.withSender(SenderBuilder.from(validEmailRequest.sender())
+					.withAddress("not-an-email-address")
+					.build())
+				.build(), "sender.address", "must be a well-formed email address"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withSender(null).build(), "sender", "must not be null"));
 	}
 
 	private static Stream<Arguments> getSendEmailRequestSenderValidationArguments() {
+		var validSender = createValidSender();
+
 		return Stream.of(
 			// Validate sender reply-to address
-			Arguments.of(createValidSender(s -> s.setReplyTo("not-an-email-address")), "replyTo", "must be a well-formed email address"),
+			Arguments.of(SenderBuilder.from(validSender).withReplyTo("not-an-email-address").build(), "replyTo", "must be a well-formed email address"),
 
 			// Validate sender email address.
-			Arguments.of(createValidSender(s -> s.setAddress("kalle")), "address", "must be a well-formed email address"),
-			Arguments.of(createValidSender(s -> s.setAddress("")), "address", "must not be blank"),
-			Arguments.of(createValidSender(s -> s.setAddress(null)), "address", "must not be blank"),
+			Arguments.of(SenderBuilder.from(validSender).withAddress("kalle").build(), "address", "must be a well-formed email address"),
+			Arguments.of(SenderBuilder.from(validSender).withAddress("").build(), "address", "must not be blank"),
+			Arguments.of(SenderBuilder.from(validSender).withAddress(null).build(), "address", "must not be blank"),
 
 			// Validate sender name.
-			Arguments.of(createValidSender(s -> s.setName(" ")), "name", "must not be blank"),
-			Arguments.of(createValidSender(s -> s.setName(null)), "name", "must not be blank"));
+			Arguments.of(SenderBuilder.from(validSender).withName(" ").build(), "name", "must not be blank"),
+			Arguments.of(SenderBuilder.from(validSender).withName(null).build(), "name", "must not be blank"));
 	}
 
 	private static Stream<Arguments> getSendEmailRequestAttachmentValidationArguments() {
+		var validAttachment = createValidAttachment();
+
 		return Stream.of(
 			// Validate attachment content
-			Arguments.of(createValidAttachment(a -> a.setContent("Not Valid Base64")), "content", "not a valid BASE64-encoded string"),
+			Arguments.of(AttachmentBuilder.from(validAttachment).withContent("Not Valid Base64").build(), "content", "not a valid BASE64-encoded string"),
 
 			// Validate attachment contentType
-			Arguments.of(createValidAttachment(a -> a.setContentType(null)), "contentType", "must not be blank"),
-			Arguments.of(createValidAttachment(a -> a.setContentType("")), "contentType", "must not be blank"),
+			Arguments.of(AttachmentBuilder.from(validAttachment).withContentType(null).build(), "contentType", "must not be blank"),
+			Arguments.of(AttachmentBuilder.from(validAttachment).withContentType("").build(), "contentType", "must not be blank"),
 
 			// Validate attachment name
-			Arguments.of(createValidAttachment(a -> a.setName(null)), "name", "must not be blank"),
-			Arguments.of(createValidAttachment(a -> a.setName("")), "name", "must not be blank"));
-
+			Arguments.of(AttachmentBuilder.from(validAttachment).withName(null).build(), "name", "must not be blank"),
+			Arguments.of(AttachmentBuilder.from(validAttachment).withName("").build(), "name", "must not be blank"));
 	}
 }

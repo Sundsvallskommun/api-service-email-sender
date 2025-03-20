@@ -1,7 +1,9 @@
 package se.sundsvall.emailsender.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.function.Failable.stream;
 import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
@@ -24,57 +26,67 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+import se.sundsvall.emailsender.support.CustomJavaMailSenderImpl;
 
 @Service
 public class EmailService {
 
 	private static final ValidBase64ConstraintValidator BASE64_VALIDATOR = new ValidBase64ConstraintValidator();
 
-	private final JavaMailSender mailSender;
+	private Map<String, JavaMailSender> mailSenders;
 
-	public EmailService(@Qualifier("integration.email.mail-sender") final JavaMailSender mailSender) {
-		this.mailSender = mailSender;
+	public EmailService(final List<JavaMailSender> mailSenders) {
+		this.mailSenders = mailSenders.stream()
+			.filter(CustomJavaMailSenderImpl.class::isInstance)
+			.map(CustomJavaMailSenderImpl.class::cast)
+			.collect(toMap(CustomJavaMailSenderImpl::getMunicipalityId, Function.identity()));
 	}
 
-	public void sendMail(final SendEmailRequest request) throws MessagingException {
-		final var mimeMessage = createMimeMessage(request);
+	public void sendMail(final String municipalityId, final SendEmailRequest request) throws MessagingException {
+		var mailSender = mailSenders.get(municipalityId);
+		if (isNull(mailSender)) {
+			throw Problem.valueOf(Status.BAD_GATEWAY, "No SMTP configuration exists for municipalityId " + municipalityId);
+		}
+
+		var mimeMessage = createMimeMessage(mailSender, request);
 
 		mailSender.send(mimeMessage);
 	}
 
-	MimeMessage createMimeMessage(final SendEmailRequest request) throws MessagingException {
-		final var message = mailSender.createMimeMessage();
+	MimeMessage createMimeMessage(final JavaMailSender mailSender, final SendEmailRequest request) throws MessagingException {
+		var message = mailSender.createMimeMessage();
 
 		// Handle sender (NAME <ADDRESS>)
-		String sender = encode(request.getSender().getName()) +
-			" " +
-			"<" + request.getSender().getAddress() + ">";
-		message.setFrom(sender);
+		var sender = request.sender();
+		var from = encode(sender.name()) + " " + "<" + sender.address() + ">";
+		message.setFrom(from);
 
 		// Handle reply-to - if no reply-to address is set, use the sender address
-		final var replyTo = ofNullable(request.getSender().getReplyTo())
+		var replyTo = ofNullable(sender.replyTo())
 			.filter(StringUtils::isNotBlank)
-			.orElseGet(() -> request.getSender().getAddress());
+			.orElseGet(sender::address);
 		message.setReplyTo(InternetAddress.parse(replyTo));
 
 		// Handle recipient
-		message.setRecipients(Message.RecipientType.TO, request.getEmailAddress());
+		message.setRecipients(Message.RecipientType.TO, request.emailAddress());
 
 		// Handle subject
-		message.setSubject(request.getSubject(), UTF_8.name());
+		message.setSubject(request.subject(), UTF_8.name());
 
 		// Handle content and attachments
 		message.setContent(createMultiPart(request));
 
 		// Handle optional headers
-		stream(ofNullable(request.getHeaders()).orElse(Map.of()).entrySet())
+		stream(ofNullable(request.headers()).orElse(Map.of()).entrySet())
 			.forEach(header -> message.addHeader(
 				Header.fromString(header.getKey()).getKey(),
 				formatHeader(header.getValue())));
@@ -91,25 +103,25 @@ public class EmailService {
 	}
 
 	Multipart createMultiPart(final SendEmailRequest request) throws MessagingException {
-		final var multipart = new MimeMultipart("alternative");
+		var multipart = new MimeMultipart("alternative");
 		// If plain-text message is provided, add it first, to give priority to HTML if it exists
-		if (StringUtils.isNotBlank(request.getMessage())) {
-			multipart.addBodyPart((BodyPart) createTextMimePart(request.getMessage()));
+		if (StringUtils.isNotBlank(request.message())) {
+			multipart.addBodyPart((BodyPart) createTextMimePart(request.message()));
 		}
-		if (StringUtils.isNotBlank(request.getHtmlMessage())) {
-			multipart.addBodyPart((BodyPart) createHtmlMimePart(request.getHtmlMessage()));
+		if (StringUtils.isNotBlank(request.htmlMessage())) {
+			multipart.addBodyPart((BodyPart) createHtmlMimePart(request.htmlMessage()));
 		}
 
 		// Handle attachments
-		for (final var attachment : ofNullable(request.getAttachments()).orElse(List.of())) {
-			if (!BASE64_VALIDATOR.isValid(attachment.getContent())) {
+		for (var attachment : ofNullable(request.attachments()).orElse(List.of())) {
+			if (!BASE64_VALIDATOR.isValid(attachment.content())) {
 				continue;
 			}
-			final var content = Base64.getDecoder().decode(attachment.getContent());
-			final var attachmentPart = new MimeBodyPart();
-			attachmentPart.setFileName(attachment.getName());
+			var content = Base64.getDecoder().decode(attachment.content());
+			var attachmentPart = new MimeBodyPart();
+			attachmentPart.setFileName(attachment.name());
 			attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(content, attachmentPart.getContentType())));
-			attachmentPart.setHeader("Content-Type", attachment.getContentType());
+			attachmentPart.setHeader("Content-Type", attachment.contentType());
 			// Set content-transfer-encoding header to base64, to minimize encoding issues
 			attachmentPart.setHeader("Content-Transfer-Encoding", "base64");
 			multipart.addBodyPart(attachmentPart);
@@ -119,7 +131,7 @@ public class EmailService {
 	}
 
 	MimePart createTextMimePart(final String content) throws MessagingException {
-		final var part = new MimeBodyPart();
+		var part = new MimeBodyPart();
 		part.setText(content, UTF_8.name(), TEXT_PLAIN.getSubtype());
 		return part;
 	}
@@ -127,7 +139,7 @@ public class EmailService {
 	MimePart createHtmlMimePart(final String content) throws MessagingException {
 		return decodeBase64(content)
 			.map(throwingFunction(decodedContent -> {
-				final var part = new MimeBodyPart();
+				var part = new MimeBodyPart();
 				part.setText(decodedContent, UTF_8.name(), TEXT_HTML.getSubtype());
 				return part;
 			}))

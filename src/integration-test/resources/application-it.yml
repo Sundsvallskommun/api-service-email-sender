@@ -5,5 +5,7 @@ spring:
 # Intentionally empty, since they are set dynamically when the mailpit Testcontainer is started
 integration:
   email:
-    hostname:
-    port:
+    instances:
+      2281:
+        host:
+        port:

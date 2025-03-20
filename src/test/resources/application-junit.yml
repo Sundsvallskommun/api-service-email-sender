@@ -4,5 +4,7 @@ spring:
 
 integration:
   email:
-    hostname: somehost.com
-    port: 25
+    instances:
+      2281:
+        host: somehost.com
+        port: 25

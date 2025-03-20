@@ -1,6 +1,7 @@
 package se.sundsvall.emailsender.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -14,31 +15,42 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.zalando.problem.Status;
+import org.zalando.problem.ThrowableProblem;
+import se.sundsvall.emailsender.support.CustomJavaMailSenderImpl;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTests {
 
+	private static final String MUNICIPALITY_ID = "2281";
+
 	@Mock
-	private JavaMailSender mockMailSender;
+	private CustomJavaMailSenderImpl mockMailSender;
 
 	@Mock
 	private MimeMessage mockMimeMessage;
 
-	@InjectMocks
 	private EmailService service;
+
+	@BeforeEach
+	void setUp() {
+		when(mockMailSender.getMunicipalityId()).thenReturn(MUNICIPALITY_ID);
+
+		service = new EmailService(List.of(mockMailSender));
+	}
 
 	@Test
 	void sendEmail_withValidRequest_returnsTrue() throws MessagingException {
-		final var request = createValidEmailRequest();
+		var request = createValidEmailRequest();
+
 		when(mockMailSender.createMimeMessage()).thenReturn(mockMimeMessage);
 
-		service.sendMail(request);
+		service.sendMail(MUNICIPALITY_ID, request);
 
 		verify(mockMailSender).send(mockMimeMessage);
 		verifyNoMoreInteractions(mockMailSender);
@@ -55,8 +67,21 @@ class EmailServiceTests {
 	}
 
 	@Test
+	void sendEmail_withUnconfiguredMunicipalityId_throwsBadGateway() {
+		var municipalityId = "someOtherMunicipalityId";
+		var request = createValidEmailRequest();
+
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> service.sendMail(municipalityId, request))
+			.satisfies(thrownProblem -> {
+				assertThat(thrownProblem.getStatus()).isEqualTo(Status.BAD_GATEWAY);
+				assertThat(thrownProblem.getMessage()).endsWith("No SMTP configuration exists for municipalityId " + municipalityId);
+			});
+	}
+
+	@Test
 	void formatHeaderTest() {
-		List<String> strings = List.of("<abc@abc>", "<bac@bac>", "<cab@cab>");
+		var strings = List.of("<abc@abc>", "<bac@bac>", "<cab@cab>");
 
 		var result = service.formatHeader(strings);
 
