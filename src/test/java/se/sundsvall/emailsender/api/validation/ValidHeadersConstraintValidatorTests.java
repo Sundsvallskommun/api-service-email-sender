@@ -23,12 +23,14 @@ import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.validation.impl.ValidHeadersConstraintValidator;
 
 @ExtendWith(MockitoExtension.class)
-class ValidHeadersConstraintValidatorTest {
+class ValidHeadersConstraintValidatorTests {
 
 	@Mock
 	private HibernateConstraintValidatorContext mockContext;
+
 	@Mock
 	private HibernateConstraintViolationBuilder mockViolationBuilder;
+
 	@Mock
 	private ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext mockNodeBuilderContext;
 
@@ -115,5 +117,4 @@ class ValidHeadersConstraintValidatorTest {
 		verify(mockContext, times(4)).buildConstraintViolationWithTemplate(any());
 		verifyNoMoreInteractions(mockContext);
 	}
-
 }

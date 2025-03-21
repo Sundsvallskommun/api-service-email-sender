@@ -8,89 +8,45 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.jilt.Builder;
 import se.sundsvall.dept44.common.validators.annotation.ValidBase64;
 import se.sundsvall.emailsender.api.validation.ValidHeaders;
 
-@Getter
-@Setter
-@Builder(setterPrefix = "with", toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder(setterPrefix = "with", factoryMethod = "create", toBuilder = "from")
 @Schema(description = "The request class for sending an e-mail")
-public class SendEmailRequest {
+public record SendEmailRequest(
 
-	@Schema(description = "Recipient e-mail address", example = "recipient@recipient.se")
-	@NotBlank
-	@Email
-	private String emailAddress;
+	@NotBlank @Email @Schema(description = "Recipient e-mail address", example = "recipient@recipient.se") String emailAddress,
 
-	@Schema(description = "E-mail subject")
-	@NotBlank
-	private String subject;
+	@NotBlank @Schema(description = "E-mail subject") String subject,
 
-	@Schema(description = "E-mail plain-text body")
-	private String message;
+	@Schema(description = "E-mail plain-text body") String message,
 
-	@Schema(description = "E-mail HTML body (BASE64-encoded)")
-	@ValidBase64(nullable = true)
-	private String htmlMessage;
+	@ValidBase64(nullable = true) @Schema(description = "E-mail HTML body (BASE64-encoded)") String htmlMessage,
 
-	@Valid
-	@NotNull
-	private Sender sender;
+	@Valid @NotNull Sender sender,
 
-	private List<@Valid Attachment> attachments;
+	List<@Valid Attachment> attachments,
 
-	@Schema(description = "Headers")
-	private @ValidHeaders Map<@NotBlank String, @NotEmpty List<String>> headers;
+	@ValidHeaders @Schema(description = "Headers") Map<@NotBlank String, @NotEmpty List<String>> headers) {
 
-	@Getter
-	@Setter
-	@Builder(setterPrefix = "with")
-	@NoArgsConstructor
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
-	@Schema(description = "E-mail attachment")
-	public static class Attachment {
+	@Builder(setterPrefix = "with", factoryMethod = "create", toBuilder = "from")
+	@Schema(description = "Attachment")
+	public record Attachment(
 
-		@Schema(description = "The attachment (file) content as a BASE64-encoded string", example = "aGVsbG8gd29ybGQK")
-		@ValidBase64
-		private String content;
+		@ValidBase64 @Schema(description = "The attachment (file) content as a BASE64-encoded string", example = "aGVsbG8gd29ybGQK") String content,
 
-		@Schema(description = "The attachment filename", example = "test.txt")
-		@NotBlank
-		private String name;
+		@NotBlank @Schema(description = "The attachment filename", example = "test.txt") String name,
 
-		@Schema(description = "The attachment content type", example = "text/plain")
-		@NotBlank
-		private String contentType;
-	}
+		@NotBlank @Schema(description = "The attachment content type", example = "text/plain") String contentType) {}
 
-	@Getter
-	@Setter
-	@Builder(setterPrefix = "with")
-	@NoArgsConstructor
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@Builder(setterPrefix = "with", factoryMethod = "create", toBuilder = "from")
 	@Schema(description = "E-mail sender")
-	public static class Sender {
+	public record Sender(
 
-		@NotBlank
-		@Schema(description = "The sender of the e-mail")
-		private String name;
+		@NotBlank @Schema(description = "The sender of the e-mail") String name,
 
-		@Email
-		@NotBlank
-		@Schema(description = "Sender e-mail address", example = "sender@sender.se")
-		private String address;
+		@Email @NotBlank @Schema(description = "Sender e-mail address", example = "sender@sender.se") String address,
 
-		@Email
-		@Schema(description = "Reply-to e-mail address", example = "sender@sender.se")
-		private String replyTo;
-	}
-
+		@Email @Schema(description = "Reply-to e-mail address", example = "sender@sender.se") String replyTo) {}
 }

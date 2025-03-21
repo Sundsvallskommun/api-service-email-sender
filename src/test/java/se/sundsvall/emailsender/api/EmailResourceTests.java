@@ -29,26 +29,26 @@ class EmailResourceTests {
 	private WebTestClient webTestClient;
 
 	@MockitoBean
-	private EmailService serviceMock;
+	private EmailService mockEmailService;
 
+	@Captor
+	private ArgumentCaptor<String> municipalityIdCaptor;
 	@Captor
 	private ArgumentCaptor<SendEmailRequest> requestCaptor;
 
 	@Test
 	void sendMail() throws Exception {
-		// Arrange
-		final var request = createValidEmailRequest();
+		var request = createValidEmailRequest();
 
-		// Act
 		webTestClient.post().uri(PATH).contentType(APPLICATION_JSON)
 			.bodyValue(request)
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody().isEmpty();
 
-		// Assert
-		verify(serviceMock).sendMail(requestCaptor.capture());
+		verify(mockEmailService).sendMail(municipalityIdCaptor.capture(), requestCaptor.capture());
+
+		assertThat(municipalityIdCaptor.getValue()).isEqualTo(MUNICIPALITY_ID);
 		assertThat(requestCaptor.getValue()).usingRecursiveComparison().isEqualTo(request);
 	}
-
 }

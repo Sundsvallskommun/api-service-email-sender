@@ -54,7 +54,7 @@ class EmailResource {
 		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final SendEmailRequest request) throws MessagingException {
 
-		service.sendMail(request);
+		service.sendMail(municipalityId, request);
 
 		return ok().build();
 	}
