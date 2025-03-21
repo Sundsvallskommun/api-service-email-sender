@@ -6,27 +6,35 @@ import jakarta.validation.Validator;
 import java.util.Map;
 import java.util.Properties;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.bind.validation.ValidationBindHandler;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import se.sundsvall.emailsender.support.CustomJavaMailSenderImpl;
 
-class SmtpBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+@Component
+class SmtpBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor, ApplicationContextAware, InitializingBean {
 
 	static final String JAVA_MAIL_SENDER_BEAN_NAME = "java-mail-sender-";
 
 	static final String DEFAULT_PROPERTIES = "integration.email.default-properties";
 	static final String INSTANCES = "integration.email.instances";
 
-	private final Properties defaultProperties;
-	private final Map<String, SmtpServerProperties> smtpServerPropertiesByMunicipalityId;
+	private ApplicationContext applicationContext;
+	private Properties defaultProperties;
+	private Map<String, SmtpServerProperties> smtpServerPropertiesByMunicipalityId;
 
-	SmtpBeanDefinitionRegistryPostProcessor(final Environment environment, final Validator validator) {
+	@Override
+	public void afterPropertiesSet() {
+		var environment = applicationContext.getEnvironment();
+		var validator = applicationContext.getBean(Validator.class);
 		var validationBindHandler = new ValidationBindHandler(new SpringValidatorAdapter(validator));
 		var binder = Binder.get(environment);
 
@@ -57,5 +65,10 @@ class SmtpBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryP
 
 			registry.registerBeanDefinition(JAVA_MAIL_SENDER_BEAN_NAME + municipalityId, beanDefinition);
 		});
+	}
+
+	@Override
+	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 }
