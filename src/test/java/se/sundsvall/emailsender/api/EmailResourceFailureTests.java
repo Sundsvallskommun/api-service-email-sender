@@ -41,7 +41,7 @@ class EmailResourceFailureTests {
 	private WebTestClient webTestClient;
 
 	@MockitoBean
-	private EmailService mockService;
+	private EmailService mockEmailService;
 
 	@ParameterizedTest
 	@MethodSource("invalidRequestsProvider")
@@ -93,7 +93,7 @@ class EmailResourceFailureTests {
 				.containsExactlyInAnyOrder(tuple("headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
 		});
 
-		verifyNoInteractions(mockService);
+		verifyNoInteractions(mockEmailService);
 	}
 
 	@Test

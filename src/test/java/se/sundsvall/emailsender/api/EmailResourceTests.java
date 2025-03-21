@@ -29,7 +29,7 @@ class EmailResourceTests {
 	private WebTestClient webTestClient;
 
 	@MockitoBean
-	private EmailService serviceMock;
+	private EmailService mockEmailService;
 
 	@Captor
 	private ArgumentCaptor<String> municipalityIdCaptor;
@@ -46,7 +46,7 @@ class EmailResourceTests {
 			.expectStatus().isOk()
 			.expectBody().isEmpty();
 
-		verify(serviceMock).sendMail(municipalityIdCaptor.capture(), requestCaptor.capture());
+		verify(mockEmailService).sendMail(municipalityIdCaptor.capture(), requestCaptor.capture());
 
 		assertThat(municipalityIdCaptor.getValue()).isEqualTo(MUNICIPALITY_ID);
 		assertThat(requestCaptor.getValue()).usingRecursiveComparison().isEqualTo(request);

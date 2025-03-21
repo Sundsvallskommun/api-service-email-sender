@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
-import se.sundsvall.emailsender.support.CustomJavaMailSenderImpl;
+import se.sundsvall.emailsender.support.MunicipalityIdAwareJavaMailSender;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTests {
@@ -30,18 +30,18 @@ class EmailServiceTests {
 	private static final String MUNICIPALITY_ID = "2281";
 
 	@Mock
-	private CustomJavaMailSenderImpl mockMailSender;
+	private MunicipalityIdAwareJavaMailSender mockMailSender;
 
 	@Mock
 	private MimeMessage mockMimeMessage;
 
-	private EmailService service;
+	private EmailService emailService;
 
 	@BeforeEach
 	void setUp() {
 		when(mockMailSender.getMunicipalityId()).thenReturn(MUNICIPALITY_ID);
 
-		service = new EmailService(List.of(mockMailSender));
+		emailService = new EmailService(List.of(mockMailSender));
 	}
 
 	@Test
@@ -50,7 +50,7 @@ class EmailServiceTests {
 
 		when(mockMailSender.createMimeMessage()).thenReturn(mockMimeMessage);
 
-		service.sendMail(MUNICIPALITY_ID, request);
+		emailService.sendMail(MUNICIPALITY_ID, request);
 
 		verify(mockMailSender).send(mockMimeMessage);
 		verifyNoMoreInteractions(mockMailSender);
@@ -72,7 +72,7 @@ class EmailServiceTests {
 		var request = createValidEmailRequest();
 
 		assertThatExceptionOfType(ThrowableProblem.class)
-			.isThrownBy(() -> service.sendMail(municipalityId, request))
+			.isThrownBy(() -> emailService.sendMail(municipalityId, request))
 			.satisfies(thrownProblem -> {
 				assertThat(thrownProblem.getStatus()).isEqualTo(Status.BAD_GATEWAY);
 				assertThat(thrownProblem.getMessage()).endsWith("No SMTP configuration exists for municipalityId " + municipalityId);
@@ -83,7 +83,7 @@ class EmailServiceTests {
 	void formatHeaderTest() {
 		var strings = List.of("<abc@abc>", "<bac@bac>", "<cab@cab>");
 
-		var result = service.formatHeader(strings);
+		var result = emailService.formatHeader(strings);
 
 		assertThat(result).isEqualTo("<abc@abc> <bac@bac> <cab@cab>");
 	}

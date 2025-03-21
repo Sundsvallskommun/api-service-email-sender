@@ -35,20 +35,20 @@ import org.zalando.problem.Status;
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
-import se.sundsvall.emailsender.support.CustomJavaMailSenderImpl;
+import se.sundsvall.emailsender.support.MunicipalityIdAwareJavaMailSender;
 
 @Service
 public class EmailService {
 
 	private static final ValidBase64ConstraintValidator BASE64_VALIDATOR = new ValidBase64ConstraintValidator();
 
-	private Map<String, JavaMailSender> mailSenders;
+	private final Map<String, JavaMailSender> mailSenders;
 
 	public EmailService(final List<JavaMailSender> mailSenders) {
 		this.mailSenders = mailSenders.stream()
-			.filter(CustomJavaMailSenderImpl.class::isInstance)
-			.map(CustomJavaMailSenderImpl.class::cast)
-			.collect(toMap(CustomJavaMailSenderImpl::getMunicipalityId, Function.identity()));
+			.filter(MunicipalityIdAwareJavaMailSender.class::isInstance)
+			.map(MunicipalityIdAwareJavaMailSender.class::cast)
+			.collect(toMap(MunicipalityIdAwareJavaMailSender::getMunicipalityId, Function.identity()));
 	}
 
 	public void sendMail(final String municipalityId, final SendEmailRequest request) throws MessagingException {
