@@ -37,7 +37,7 @@ class EmailResourceTests {
 	private ArgumentCaptor<SendEmailRequest> requestCaptor;
 
 	@Test
-	void sendMail() throws Exception {
+	void sendMail() {
 		var request = createValidSendEmailRequest();
 
 		webTestClient.post().uri(PATH).contentType(APPLICATION_JSON)
