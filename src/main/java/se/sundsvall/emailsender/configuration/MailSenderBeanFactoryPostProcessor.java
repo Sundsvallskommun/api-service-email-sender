@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.bind.validation.ValidationBin
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +35,7 @@ import se.sundsvall.emailsender.service.MicrosoftGraphMailSender;
 import se.sundsvall.emailsender.service.SmtpMailSender;
 
 @Component
-class SmtpBeanFactoryPostProcessor implements BeanFactoryPostProcessor, ApplicationContextAware, InitializingBean {
+class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, ApplicationContextAware, InitializingBean {
 
 	static final String SMTP_MAIL_SENDER_BEAN_NAME = "smtp-mail-sender-";
 	static final String MICROSOFT_GRAPH_MAIL_SENDER_BEAN_NAME = "ms-graph-mail-sender-";
@@ -45,80 +46,87 @@ class SmtpBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Applicat
 	private Environment environment;
 	private Validator validator;
 	private Properties defaultProperties;
-	private Map<String, SmtpServerProperties> smtpServerPropertiesByMunicipalityId;
+	private Map<String, MailSenderProperties> mailSenderPropertiesByMunicipalityId;
 
 	@Override
 	public void afterPropertiesSet() {
 		var validationBindHandler = new ValidationBindHandler(new SpringValidatorAdapter(validator));
 		var binder = Binder.get(environment);
 
+		// Bind/load (or create empty) default properties
 		defaultProperties = binder.bindOrCreate(DEFAULT_PROPERTIES, Bindable.of(Properties.class), validationBindHandler);
-		smtpServerPropertiesByMunicipalityId = binder.bind(
-			INSTANCES, Bindable.mapOf(String.class, SmtpServerProperties.class), validationBindHandler).get();
+		// Bind/load instance properties
+		mailSenderPropertiesByMunicipalityId = binder.bind(
+			INSTANCES, Bindable.mapOf(String.class, MailSenderProperties.class), validationBindHandler).get();
 	}
 
 	@Override
 	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		var beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
 
-		smtpServerPropertiesByMunicipalityId.forEach((municipalityId, smtpServerProperties) -> {
-			var basicSet = nonNull(smtpServerProperties.basic);
-			var azureSet = nonNull(smtpServerProperties.azure);
+		mailSenderPropertiesByMunicipalityId.forEach((municipalityId, mailSenderProperties) -> {
+			var basicSet = nonNull(mailSenderProperties.basic);
+			var azureSet = nonNull(mailSenderProperties.azure);
 
 			// Make sure that exactly one of "basic" and "azure" is set, and validate the one that actually is
 			if ((!basicSet && !azureSet) || (basicSet && azureSet)) {
 				throw new BeanCreationException("Exactly one of SMTP 'basic' or 'azure' properties must be set");
 			} else if (basicSet) {
-				validator.validate(smtpServerProperties.basic);
+				validator.validate(mailSenderProperties.basic);
 
 				// Merge the default properties with the SMTP server properties, with
 				// values from the latter possibly overriding defaults
 				var mergedProperties = new Properties();
 				mergedProperties.putAll(defaultProperties);
-				if (nonNull(smtpServerProperties.basic.properties)) {
-					mergedProperties.putAll(smtpServerProperties.basic.properties);
+				if (nonNull(mailSenderProperties.basic.properties)) {
+					mergedProperties.putAll(mailSenderProperties.basic.properties);
 				}
 
-				registerSmtpMailSender(beanDefinitionRegistry, municipalityId, smtpServerProperties, mergedProperties);
+				registerSmtpMailSender(beanDefinitionRegistry, municipalityId, mailSenderProperties, mergedProperties);
 			} else {
-				validator.validate(smtpServerProperties.azure);
+				validator.validate(mailSenderProperties.azure);
 
-				registerMicrosoftGraphMailSender(beanDefinitionRegistry, municipalityId, smtpServerProperties);
+				registerMicrosoftGraphMailSender(beanDefinitionRegistry, municipalityId, mailSenderProperties);
 			}
 		});
 	}
 
-	void registerSmtpMailSender(final BeanDefinitionRegistry beanDefinitionRegistry, final String municipalityId, final SmtpServerProperties smtpServerProperties, final Properties mergedProperties) {
-		var javaMailSender = new NoOpOnUpdateMessageIdJavaMailSender();
-		javaMailSender.setHost(smtpServerProperties.basic.host);
-		javaMailSender.setPort(smtpServerProperties.basic.port);
-		ofNullable(smtpServerProperties.basic.username).ifPresent(javaMailSender::setUsername);
-		ofNullable(smtpServerProperties.basic.password).ifPresent(javaMailSender::setPassword);
-		javaMailSender.setJavaMailProperties(mergedProperties);
-
+	void registerSmtpMailSender(final BeanDefinitionRegistry beanDefinitionRegistry, final String municipalityId, final MailSenderProperties mailSenderProperties, final Properties mergedJavaMailProperties) {
 		var beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SmtpMailSender.class)
-			.addConstructorArgValue(javaMailSender)
+			.addConstructorArgValue(createJavaMailSender(mailSenderProperties.basic, mergedJavaMailProperties))
 			.addPropertyValue("municipalityId", municipalityId)
 			.getBeanDefinition();
 
 		registerBeanDefinition(beanDefinitionRegistry, SMTP_MAIL_SENDER_BEAN_NAME + municipalityId, beanDefinition);
 	}
 
-	void registerMicrosoftGraphMailSender(final BeanDefinitionRegistry beanDefinitionRegistry, final String municipalityId, final SmtpServerProperties smtpServerProperties) {
-		var clientSecretCredential = new ClientSecretCredentialBuilder()
-			.tenantId(smtpServerProperties.azure.tenantId)
-			.clientId(smtpServerProperties.azure.clientId)
-			.clientSecret(smtpServerProperties.azure.clientSecret)
-			.build();
-		var graphServiceClient = new GraphServiceClient(clientSecretCredential, smtpServerProperties.azure.scope);
+	JavaMailSender createJavaMailSender(final MailSenderProperties.Basic basicMailSenderProperties, final Properties mergedJavaMailProperties) {
+		var javaMailSender = new NoOpOnUpdateMessageIdJavaMailSender();
+		javaMailSender.setHost(basicMailSenderProperties.host);
+		javaMailSender.setPort(basicMailSenderProperties.port);
+		ofNullable(basicMailSenderProperties.username).ifPresent(javaMailSender::setUsername);
+		ofNullable(basicMailSenderProperties.password).ifPresent(javaMailSender::setPassword);
+		javaMailSender.setJavaMailProperties(mergedJavaMailProperties);
+		return javaMailSender;
+	}
 
+	void registerMicrosoftGraphMailSender(final BeanDefinitionRegistry beanDefinitionRegistry, final String municipalityId, final MailSenderProperties mailSenderProperties) {
 		var beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(MicrosoftGraphMailSender.class)
-			.addConstructorArgValue(graphServiceClient)
-			.addConstructorArgValue(smtpServerProperties.azure.sendAsId)
+			.addConstructorArgValue(createGraphServiceClient(mailSenderProperties.azure))
+			.addConstructorArgValue(mailSenderProperties.azure.sendAsId)
 			.addPropertyValue("municipalityId", municipalityId)
 			.getBeanDefinition();
 
 		registerBeanDefinition(beanDefinitionRegistry, MICROSOFT_GRAPH_MAIL_SENDER_BEAN_NAME + municipalityId, beanDefinition);
+	}
+
+	GraphServiceClient createGraphServiceClient(final MailSenderProperties.Azure azureMailSenderProperties) {
+		var clientSecretCredential = new ClientSecretCredentialBuilder()
+			.tenantId(azureMailSenderProperties.tenantId)
+			.clientId(azureMailSenderProperties.clientId)
+			.clientSecret(azureMailSenderProperties.clientSecret)
+			.build();
+		return new GraphServiceClient(clientSecretCredential, azureMailSenderProperties.scope);
 	}
 
 	void registerBeanDefinition(final BeanDefinitionRegistry beanDefinitionRegistry, final String beanName, final BeanDefinition beanDefinition) {
@@ -158,7 +166,7 @@ class SmtpBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Applicat
 	}
 
 	@Validated
-	record SmtpServerProperties(
+	record MailSenderProperties(
 
 		Basic basic,
 		Azure azure) {

@@ -14,17 +14,17 @@ import se.sundsvall.emailsender.service.MailSender;
 
 @ActiveProfiles("junit")
 @SpringBootTest(classes = Application.class)
-class SmtpBeanFactoryPostProcessorTests {
+class MailSenderBeanFactoryPostProcessorTests {
 
 	@Autowired
-	private SmtpBeanFactoryPostProcessor smtpBeanFactoryPostProcessor;
+	private MailSenderBeanFactoryPostProcessor mailSenderBeanFactoryPostProcessor;
 
 	@Autowired
 	private List<MailSender> mailSenders;
 
 	@Test
 	void smtpBeanDefinitionRegistryPostProcessorBean_isNotNull() {
-		assertThat(smtpBeanFactoryPostProcessor).isNotNull();
+		assertThat(mailSenderBeanFactoryPostProcessor).isNotNull();
 	}
 
 	@Test
@@ -33,16 +33,16 @@ class SmtpBeanFactoryPostProcessorTests {
 	}
 
 	@Nested
-	class SmtpServerPropertiesTest {
+	class MailSenderPropertiesTest {
 
 		@Test
 		void creationAndAccessors() {
 			var properties = new Properties();
 			properties.put("someKey", "someValue");
-			var basic = new SmtpBeanFactoryPostProcessor.SmtpServerProperties.Basic("someHost", 1234, "someUsername", "somePassword", properties);
-			var azure = new SmtpBeanFactoryPostProcessor.SmtpServerProperties.Azure("someSendAsId", "someTenantId", "someClientId", "someClientSecret", "someScope");
+			var basic = new MailSenderBeanFactoryPostProcessor.MailSenderProperties.Basic("someHost", 1234, "someUsername", "somePassword", properties);
+			var azure = new MailSenderBeanFactoryPostProcessor.MailSenderProperties.Azure("someSendAsId", "someTenantId", "someClientId", "someClientSecret", "someScope");
 
-			var smtpServerProperties = new SmtpBeanFactoryPostProcessor.SmtpServerProperties(basic, azure);
+			var smtpServerProperties = new MailSenderBeanFactoryPostProcessor.MailSenderProperties(basic, azure);
 
 			assertThat(smtpServerProperties.basic()).isEqualTo(basic);
 			assertThat(smtpServerProperties.azure()).isEqualTo(azure);
