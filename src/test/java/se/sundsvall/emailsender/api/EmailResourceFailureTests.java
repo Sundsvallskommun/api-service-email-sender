@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.zalando.problem.Status.BAD_REQUEST;
-import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 
 import java.util.List;
@@ -45,7 +45,7 @@ class EmailResourceFailureTests {
 
 	@ParameterizedTest
 	@MethodSource("invalidRequestsProvider")
-	void sendMailWithInvalidRequestTest(final SendEmailRequest request, final String badArgument, final String expectedMessage) {
+	void sendMailWithInvalidRequest(final SendEmailRequest request, final String badArgument, final String expectedMessage) {
 		var response = webTestClient.post()
 			.uri(builder -> builder.path(PATH).build())
 			.bodyValue(request)
@@ -64,7 +64,7 @@ class EmailResourceFailureTests {
 	}
 
 	private static Stream<Arguments> invalidRequestsProvider() {
-		var validEmailRequest = createValidEmailRequest();
+		var validEmailRequest = createValidSendEmailRequest();
 
 		return Stream.of(
 			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress("Not a valid email").build(), "emailAddress", "must be a well-formed email address"),
@@ -74,8 +74,8 @@ class EmailResourceFailureTests {
 	}
 
 	@Test
-	void sendMailWithInvalidHeadersTest() {
-		var request = SendEmailRequestBuilder.from(createValidEmailRequest()).withHeaders(Map.of(MESSAGE_ID.getKey(), List.of("This is invalid"))).build();
+	void sendMailWithInvalidHeaders() {
+		var request = SendEmailRequestBuilder.from(createValidSendEmailRequest()).withHeaders(Map.of(MESSAGE_ID.getKey(), List.of("This is invalid"))).build();
 
 		var response = webTestClient.post()
 			.uri(builder -> builder.path(PATH).build())
@@ -97,8 +97,8 @@ class EmailResourceFailureTests {
 	}
 
 	@Test
-	void sendMailFaultyMunicipalityId() {
-		var request = createValidEmailRequest();
+	void sendMailWithFaultyMunicipalityId() {
+		var request = createValidSendEmailRequest();
 
 		var response = webTestClient.post().uri(PATH.replace(MUNICIPALITY_ID, "22-81")).contentType(APPLICATION_JSON)
 			.bodyValue(request)

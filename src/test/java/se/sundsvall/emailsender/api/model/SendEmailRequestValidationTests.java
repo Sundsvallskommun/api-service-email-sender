@@ -2,7 +2,7 @@ package se.sundsvall.emailsender.api.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static se.sundsvall.emailsender.TestDataFactory.createValidAttachment;
-import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 import static se.sundsvall.emailsender.TestDataFactory.createValidSender;
 
 import jakarta.validation.Validation;
@@ -26,7 +26,7 @@ class SendEmailRequestValidationTests {
 
 	@Test
 	void validationWithValidRequest() {
-		var request = createValidEmailRequest();
+		var request = createValidSendEmailRequest();
 		var constraintViolations = validator.validate(request);
 
 		assertThat(constraintViolations).isEmpty();
@@ -63,7 +63,7 @@ class SendEmailRequestValidationTests {
 	}
 
 	private static Stream<Arguments> getSendEmailRequestValidationArguments() {
-		var validEmailRequest = createValidEmailRequest();
+		var validEmailRequest = createValidSendEmailRequest();
 
 		return Stream.of(
 			// Validate recipient email address.
