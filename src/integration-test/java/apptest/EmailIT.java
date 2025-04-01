@@ -43,8 +43,8 @@ class EmailIT extends AbstractAppTest {
 
 	@DynamicPropertySource
 	static void configureMail(final DynamicPropertyRegistry registry) {
-		registry.add("integration.email.instances.2281.host", mailpitContainer::getHost);
-		registry.add("integration.email.instances.2281.port", mailpitContainer::getFirstMappedPort);
+		registry.add("integration.email.instances.2281.basic.host", mailpitContainer::getHost);
+		registry.add("integration.email.instances.2281.basic.port", mailpitContainer::getFirstMappedPort);
 		registry.add("mailpit.web.port", () -> mailpitContainer.getMappedPort(8025));
 	}
 

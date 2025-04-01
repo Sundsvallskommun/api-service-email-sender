@@ -3,7 +3,7 @@ package se.sundsvall.emailsender.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -38,7 +38,7 @@ class EmailResourceTests {
 
 	@Test
 	void sendMail() throws Exception {
-		var request = createValidEmailRequest();
+		var request = createValidSendEmailRequest();
 
 		webTestClient.post().uri(PATH).contentType(APPLICATION_JSON)
 			.bodyValue(request)

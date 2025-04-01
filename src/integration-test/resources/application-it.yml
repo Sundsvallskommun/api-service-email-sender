@@ -7,5 +7,6 @@ integration:
   email:
     instances:
       2281:
-        host:
-        port:
+        basic:
+          host:
+          port:

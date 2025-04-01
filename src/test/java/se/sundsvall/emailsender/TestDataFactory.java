@@ -17,7 +17,7 @@ public final class TestDataFactory {
 
 	private TestDataFactory() {}
 
-	public static SendEmailRequest createValidEmailRequest() {
+	public static SendEmailRequest createValidSendEmailRequest() {
 		var attachment = AttachmentBuilder.create()
 			.withContent(Base64.getEncoder().encodeToString("someContent".getBytes()))
 			.withName("someName")
@@ -27,7 +27,7 @@ public final class TestDataFactory {
 		var sender = SenderBuilder.create()
 			.withName("someName")
 			.withAddress("receiver@receiver.com")
-			.withReplyTo("receiver@receiver.com")
+			.withReplyTo("replyTo@receiver.com")
 			.build();
 
 		return SendEmailRequestBuilder.create()
