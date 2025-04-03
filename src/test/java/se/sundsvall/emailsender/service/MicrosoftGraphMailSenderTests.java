@@ -19,12 +19,15 @@ import com.microsoft.graph.users.UsersRequestBuilder;
 import com.microsoft.graph.users.item.UserItemRequestBuilder;
 import com.microsoft.graph.users.item.sendmail.SendMailPostRequestBody;
 import com.microsoft.graph.users.item.sendmail.SendMailRequestBuilder;
+import java.util.AbstractMap;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,7 +72,8 @@ class MicrosoftGraphMailSenderTests {
 		verify(microsoftGraphMailSenderSpy).createRecipient(null, request.sender().replyTo());
 		verify(microsoftGraphMailSenderSpy).createItemBody(request);
 		verify(microsoftGraphMailSenderSpy, times(4)).formatHeader(anyList());
-		verify(microsoftGraphMailSenderSpy, times(4)).createHeader(anyString(), anyString());
+		verify(microsoftGraphMailSenderSpy, times(4)).createHeader(any());
+		verify(microsoftGraphMailSenderSpy).createAttachment(any());
 		verify(microsoftGraphMailSenderSpy).sendEmail(request);
 
 		verify(mockMessage).setFrom(any());
@@ -78,6 +82,7 @@ class MicrosoftGraphMailSenderTests {
 		verify(mockMessage).setReplyTo(anyList());
 		verify(mockMessage).setSubject(anyString());
 		verify(mockMessage).setBody(any());
+		verify(mockMessage).setAttachments(anyList());
 		verify(mockMessage).setInternetMessageHeaders(anyList());
 
 		verify(mockSendMailPostRequestBody).setMessage(mockMessage);
@@ -88,7 +93,13 @@ class MicrosoftGraphMailSenderTests {
 		verify(mockUserItemRequestBuilder).sendMail();
 		verify(mockSendMailRequestBuilder).post(mockSendMailPostRequestBody);
 
-		verifyNoMoreInteractions(microsoftGraphMailSenderSpy, mockMessage, mockSendMailPostRequestBody, mockGraphServiceClient, mockUsersRequestBuilder, mockUserItemRequestBuilder, mockSendMailRequestBuilder);
+		verifyNoMoreInteractions(microsoftGraphMailSenderSpy);
+		verifyNoMoreInteractions(mockMessage);
+		verifyNoMoreInteractions(mockSendMailPostRequestBody);
+		verifyNoMoreInteractions(mockGraphServiceClient);
+		verifyNoMoreInteractions(mockUsersRequestBuilder);
+		verifyNoMoreInteractions(mockUserItemRequestBuilder);
+		verifyNoMoreInteractions(mockSendMailRequestBuilder);
 	}
 
 	@Test
@@ -142,12 +153,13 @@ class MicrosoftGraphMailSenderTests {
 
 	@Test
 	void createHeader() {
-		var name = "someHeaderName";
+		var name = Header.MESSAGE_ID.getKey();
 		var value = "someHeaderValue";
+		var entry = new AbstractMap.SimpleEntry<>(name, List.of(value));
 
-		var header = microsoftGraphMailSender.createHeader(name, value);
+		var header = microsoftGraphMailSender.createHeader(entry);
 
-		assertThat(header.getName()).isEqualTo(name);
+		assertThat(header.getName()).isEqualTo("X-" + name);
 		assertThat(header.getValue()).isEqualTo(value);
 	}
 }

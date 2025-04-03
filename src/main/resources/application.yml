@@ -18,7 +18,7 @@ openapi:
 # SMTP properties
 integration:
   email:
-    properties:
+    default-properties:
       mail:
         smtp:
           auth: false
