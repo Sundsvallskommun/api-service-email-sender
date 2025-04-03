@@ -93,13 +93,7 @@ class MicrosoftGraphMailSenderTests {
 		verify(mockUserItemRequestBuilder).sendMail();
 		verify(mockSendMailRequestBuilder).post(mockSendMailPostRequestBody);
 
-		verifyNoMoreInteractions(microsoftGraphMailSenderSpy);
-		verifyNoMoreInteractions(mockMessage);
-		verifyNoMoreInteractions(mockSendMailPostRequestBody);
-		verifyNoMoreInteractions(mockGraphServiceClient);
-		verifyNoMoreInteractions(mockUsersRequestBuilder);
-		verifyNoMoreInteractions(mockUserItemRequestBuilder);
-		verifyNoMoreInteractions(mockSendMailRequestBuilder);
+		verifyNoMoreInteractions(microsoftGraphMailSenderSpy, mockMessage, mockSendMailPostRequestBody, mockGraphServiceClient, mockUsersRequestBuilder, mockUserItemRequestBuilder, mockSendMailRequestBuilder);
 	}
 
 	@Test
