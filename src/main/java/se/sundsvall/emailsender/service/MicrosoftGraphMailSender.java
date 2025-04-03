@@ -1,11 +1,15 @@
 package se.sundsvall.emailsender.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.microsoft.graph.models.Attachment;
 import com.microsoft.graph.models.BodyType;
 import com.microsoft.graph.models.EmailAddress;
+import com.microsoft.graph.models.FileAttachment;
 import com.microsoft.graph.models.InternetMessageHeader;
 import com.microsoft.graph.models.ItemBody;
 import com.microsoft.graph.models.Message;
@@ -15,9 +19,11 @@ import com.microsoft.graph.users.item.sendmail.SendMailPostRequestBody;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
+import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 public class MicrosoftGraphMailSender extends AbstractMailSender {
@@ -50,16 +56,27 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 				.orElse(sender.address());
 			message.setReplyTo(List.of(createRecipient(replyTo)));
 
+			// Attachments
+			var attachments = ofNullable(request.attachments()).orElse(emptyList()).stream()
+				.map(this::createAttachment)
+				.filter(Objects::nonNull)
+				.toList();
+			if (!attachments.isEmpty()) {
+				message.setAttachments(attachments);
+			}
+
+			// Headers
+			var headers = ofNullable(request.headers()).orElse(emptyMap()).entrySet().stream()
+				.map(this::createHeader)
+				.toList();
+			if (!headers.isEmpty()) {
+				message.setInternetMessageHeaders(headers);
+			}
+
 			// Request
 			var requestBody = createSendMailPostRequestBody();
 			requestBody.setMessage(message);
 			requestBody.setSaveToSentItems(false);
-
-			// Handle optional headers
-			var headers = ofNullable(request.headers()).orElse(Map.of()).entrySet().stream()
-				.map(header -> createHeader(header.getKey(), formatHeader(header.getValue())))
-				.toList();
-			message.setInternetMessageHeaders(headers);
 
 			// Send the e-mail
 			graphServiceClient.users()
@@ -113,10 +130,23 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 		return recipient;
 	}
 
-	InternetMessageHeader createHeader(final String name, final String value) {
+	Attachment createAttachment(final SendEmailRequest.Attachment attachment) {
+		if (!BASE64_VALIDATOR.isValid(attachment.content())) {
+			return null;
+		}
+		var content = Base64.getDecoder().decode(attachment.content());
+
+		var fileAttachment = new FileAttachment();
+		fileAttachment.setName(attachment.name());
+		fileAttachment.setContentType(attachment.contentType());
+		fileAttachment.setContentBytes(content);
+		return fileAttachment;
+	}
+
+	InternetMessageHeader createHeader(final Map.Entry<String, List<String>> headerEntry) {
 		var header = new InternetMessageHeader();
-		header.setName(name);
-		header.setValue(value);
+		header.setName("X-" + Header.fromString(headerEntry.getKey()).getKey());
+		header.setValue(formatHeader(headerEntry.getValue()));
 		return header;
 	}
 }
