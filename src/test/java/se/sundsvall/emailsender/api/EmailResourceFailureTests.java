@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.zalando.problem.Status.BAD_REQUEST;
-import static se.sundsvall.emailsender.TestDataFactory.createValidEmailRequest;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 
 import java.util.List;
@@ -26,11 +26,12 @@ import org.zalando.problem.violations.ConstraintViolationProblem;
 import org.zalando.problem.violations.Violation;
 import se.sundsvall.emailsender.Application;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
 import se.sundsvall.emailsender.service.EmailService;
 
 @SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("junit")
-class EmailResourceFailureTest {
+class EmailResourceFailureTests {
 
 	private static final String MUNICIPALITY_ID = "2281";
 
@@ -40,20 +41,12 @@ class EmailResourceFailureTest {
 	private WebTestClient webTestClient;
 
 	@MockitoBean
-	private EmailService mockService;
-
-	private static Stream<Arguments> invalidRequestsProvider() {
-		return Stream.of(
-			Arguments.of(createValidEmailRequest(r -> r.setEmailAddress("Not a valid email")), "emailAddress", "must be a well-formed email address"),
-			Arguments.of(createValidEmailRequest(r -> r.setSubject("")), "subject", "must not be blank"),
-			Arguments.of(createValidEmailRequest(r -> r.setHtmlMessage("Not base64")), "htmlMessage", "not a valid BASE64-encoded string"),
-			Arguments.of(createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID.getKey(), List.of("")))), "headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
-	}
+	private EmailService mockEmailService;
 
 	@ParameterizedTest
 	@MethodSource("invalidRequestsProvider")
-	void sendMailWithInvalidRequestTest(final SendEmailRequest request, final String badArgument, final String expectedMessage) {
-		final var response = webTestClient.post()
+	void sendMailWithInvalidRequest(final SendEmailRequest request, final String badArgument, final String expectedMessage) {
+		var response = webTestClient.post()
 			.uri(builder -> builder.path(PATH).build())
 			.bodyValue(request)
 			.exchange()
@@ -68,14 +61,23 @@ class EmailResourceFailureTest {
 			assertThat(r.getViolations()).extracting(Violation::getField, Violation::getMessage)
 				.containsExactlyInAnyOrder(tuple(badArgument, expectedMessage));
 		});
+	}
 
+	private static Stream<Arguments> invalidRequestsProvider() {
+		var validEmailRequest = createValidSendEmailRequest();
+
+		return Stream.of(
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress("Not a valid email").build(), "emailAddress", "must be a well-formed email address"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withSubject("").build(), "subject", "must not be blank"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withHtmlMessage("Not base64").build(), "htmlMessage", "not a valid BASE64-encoded string"),
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withHeaders(Map.of(MESSAGE_ID.getKey(), List.of(""))).build(), "headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
 	}
 
 	@Test
-	void sendMailWithInvalidHeadersTest() {
-		final var request = createValidEmailRequest(r -> r.setHeaders(Map.of(MESSAGE_ID.getKey(), List.of("This is invalid"))));
+	void sendMailWithInvalidHeaders() {
+		var request = SendEmailRequestBuilder.from(createValidSendEmailRequest()).withHeaders(Map.of(MESSAGE_ID.getKey(), List.of("This is invalid"))).build();
 
-		final var response = webTestClient.post()
+		var response = webTestClient.post()
 			.uri(builder -> builder.path(PATH).build())
 			.bodyValue(request)
 			.exchange()
@@ -91,16 +93,14 @@ class EmailResourceFailureTest {
 				.containsExactlyInAnyOrder(tuple("headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
 		});
 
-		verifyNoInteractions(mockService);
+		verifyNoInteractions(mockEmailService);
 	}
 
 	@Test
-	void sendMailFaultyMunicipalityId() {
-		// Arrange
-		final var request = createValidEmailRequest();
+	void sendMailWithFaultyMunicipalityId() {
+		var request = createValidSendEmailRequest();
 
-		// Act
-		final var response = webTestClient.post().uri(PATH.replace(MUNICIPALITY_ID, "22-81")).contentType(APPLICATION_JSON)
+		var response = webTestClient.post().uri(PATH.replace(MUNICIPALITY_ID, "22-81")).contentType(APPLICATION_JSON)
 			.bodyValue(request)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -108,7 +108,6 @@ class EmailResourceFailureTest {
 			.returnResult()
 			.getResponseBody();
 
-		// Assert
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
@@ -116,5 +115,4 @@ class EmailResourceFailureTest {
 			.extracting(Violation::getField, Violation::getMessage)
 			.containsExactly(Tuple.tuple("sendMail.municipalityId", "not a valid municipality ID"));
 	}
-
 }

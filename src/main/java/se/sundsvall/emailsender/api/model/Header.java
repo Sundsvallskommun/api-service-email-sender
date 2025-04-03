@@ -3,9 +3,7 @@ package se.sundsvall.emailsender.api.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 import java.util.regex.Pattern;
-import lombok.Getter;
 
-@Getter
 @Schema(enumAsRef = true)
 public enum Header {
 	IN_REPLY_TO("In-Reply-To", "^<.{1,1000}@.{1,1000}>$", "must start with '<', contain '@' and end with '>'"),

@@ -8,31 +8,29 @@ import static se.sundsvall.emailsender.api.model.Header.REFERENCES;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import se.sundsvall.emailsender.api.model.AttachmentBuilder;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
+import se.sundsvall.emailsender.api.model.SenderBuilder;
 
 public final class TestDataFactory {
 
 	private TestDataFactory() {}
 
-	public static SendEmailRequest createValidEmailRequest() {
-		return createValidEmailRequest(null);
-	}
-
-	public static SendEmailRequest createValidEmailRequest(final Consumer<SendEmailRequest> modifier) {
-		final var attachment = SendEmailRequest.Attachment.builder()
+	public static SendEmailRequest createValidSendEmailRequest() {
+		var attachment = AttachmentBuilder.create()
 			.withContent(Base64.getEncoder().encodeToString("someContent".getBytes()))
 			.withName("someName")
 			.withContentType("image/jpg")
 			.build();
 
-		final var sender = SendEmailRequest.Sender.builder()
+		var sender = SenderBuilder.create()
 			.withName("someName")
 			.withAddress("receiver@receiver.com")
-			.withReplyTo("receiver@receiver.com")
+			.withReplyTo("replyTo@receiver.com")
 			.build();
 
-		final var request = SendEmailRequest.builder()
+		return SendEmailRequestBuilder.create()
 			.withEmailAddress("receiver@receiver.com")
 			.withSubject("subject")
 			.withMessage("message")
@@ -45,47 +43,21 @@ public final class TestDataFactory {
 				AUTO_SUBMITTED.getKey(), List.of("auto-generated")))
 			.withAttachments(List.of(attachment))
 			.build();
-
-		if (modifier != null) {
-			modifier.accept(request);
-		}
-
-		return request;
 	}
 
 	public static SendEmailRequest.Sender createValidSender() {
-		return createValidSender(null);
-	}
-
-	public static SendEmailRequest.Sender createValidSender(final Consumer<SendEmailRequest.Sender> modifier) {
-		final var sender = SendEmailRequest.Sender.builder()
+		return SenderBuilder.create()
 			.withName("Sundsvalls Kommun")
 			.withAddress("info@sundsvall.se")
 			.withReplyTo("support@sundsvall.se")
 			.build();
-
-		if (modifier != null) {
-			modifier.accept(sender);
-		}
-
-		return sender;
 	}
 
 	public static SendEmailRequest.Attachment createValidAttachment() {
-		return createValidAttachment(null);
-	}
-
-	public static SendEmailRequest.Attachment createValidAttachment(final Consumer<SendEmailRequest.Attachment> modifier) {
-		final var attachment = SendEmailRequest.Attachment.builder()
+		return AttachmentBuilder.create()
 			.withName("Sundsvalls Kommun")
 			.withContent("someContent")
 			.withContentType("application/pdf")
 			.build();
-
-		if (modifier != null) {
-			modifier.accept(attachment);
-		}
-
-		return attachment;
 	}
 }

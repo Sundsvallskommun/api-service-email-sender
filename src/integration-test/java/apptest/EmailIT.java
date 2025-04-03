@@ -43,8 +43,8 @@ class EmailIT extends AbstractAppTest {
 
 	@DynamicPropertySource
 	static void configureMail(final DynamicPropertyRegistry registry) {
-		registry.add("integration.email.host", mailpitContainer::getHost);
-		registry.add("integration.email.port", mailpitContainer::getFirstMappedPort);
+		registry.add("integration.email.instances.2281.basic.host", mailpitContainer::getHost);
+		registry.add("integration.email.instances.2281.basic.port", mailpitContainer::getFirstMappedPort);
 		registry.add("mailpit.web.port", () -> mailpitContainer.getMappedPort(8025));
 	}
 
@@ -58,7 +58,8 @@ class EmailIT extends AbstractAppTest {
 			.sendRequestAndVerifyResponse();
 
 		// Verify what was actually sent
-		final var jsonPath = JsonPath.parse(request);
+		var jsonPath = JsonPath.parse(request);
+
 		webTestClient.get()
 			.uri("/messages")
 			.exchange()
@@ -74,5 +75,4 @@ class EmailIT extends AbstractAppTest {
 			.jsonPath("$.messages[0].ReplyTo[0].Address").isEqualTo(jsonPath.read("$.sender.replyTo"))
 			.jsonPath("$.messages[0].Attachments").isEqualTo(jsonPath.read("$.attachments.length()"));
 	}
-
 }

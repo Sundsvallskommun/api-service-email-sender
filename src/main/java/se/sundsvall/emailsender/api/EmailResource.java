@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -52,9 +51,9 @@ class EmailResource {
 	})
 	ResponseEntity<Void> sendMail(
 		@Parameter(name = "municipalityId", description = "Municipality id", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
-		@Valid @RequestBody final SendEmailRequest request) throws MessagingException {
+		@Valid @RequestBody final SendEmailRequest request) {
 
-		service.sendMail(request);
+		service.sendMail(municipalityId, request);
 
 		return ok().build();
 	}

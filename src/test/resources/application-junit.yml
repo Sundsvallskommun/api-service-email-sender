@@ -4,5 +4,14 @@ spring:
 
 integration:
   email:
-    hostname: somehost.com
-    port: 25
+    instances:
+      1234:
+        basic:
+          host: somehost.com
+          port: 25
+      5678:
+        azure:
+          send-as-id: someSendAsId
+          tenant-id: someTenantId
+          client-id: someClientId
+          client-secret: someClientSecret
