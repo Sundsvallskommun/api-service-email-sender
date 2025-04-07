@@ -13,7 +13,7 @@
 	<name>api-service-email-sender</name>
 
 	<properties>
-		<jilt.version>1.7</jilt.version>
+		<jilt.version>1.8</jilt.version>
 		<faux-pas.version>0.9.0</faux-pas.version>
 		<microsoft-graph.version>6.33.0</microsoft-graph.version>
 		<azure-identity.version>1.15.4</azure-identity.version>
