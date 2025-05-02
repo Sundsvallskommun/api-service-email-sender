@@ -29,19 +29,17 @@ import se.sundsvall.emailsender.api.model.SendEmailRequest;
 public class MicrosoftGraphMailSender extends AbstractMailSender {
 
 	private final GraphServiceClient graphServiceClient;
-	private final String sendAsId;
 
-	public MicrosoftGraphMailSender(final GraphServiceClient graphServiceClient, final String sendAsId) {
+	public MicrosoftGraphMailSender(final GraphServiceClient graphServiceClient) {
 		this.graphServiceClient = graphServiceClient;
-		this.sendAsId = sendAsId;
 	}
 
 	@Override
 	public void sendEmail(final SendEmailRequest request) {
 		try {
-			var sender = request.sender();
+			final var sender = request.sender();
 
-			var message = createMessage();
+			final var message = createMessage();
 			message.setFrom(createRecipient(sender.name(), sender.address()));
 			message.setSender(createRecipient(sender.name(), sender.address()));
 			message.setSubject(request.subject());
@@ -51,13 +49,13 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 			message.setToRecipients(List.of(createRecipient(request.emailAddress())));
 
 			// Reply-to
-			var replyTo = ofNullable(sender.replyTo())
+			final var replyTo = ofNullable(sender.replyTo())
 				.filter(StringUtils::isNotBlank)
 				.orElse(sender.address());
 			message.setReplyTo(List.of(createRecipient(replyTo)));
 
 			// Attachments
-			var attachments = ofNullable(request.attachments()).orElse(emptyList()).stream()
+			final var attachments = ofNullable(request.attachments()).orElse(emptyList()).stream()
 				.map(this::createAttachment)
 				.filter(Objects::nonNull)
 				.toList();
@@ -66,7 +64,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 			}
 
 			// Headers
-			var headers = ofNullable(request.headers()).orElse(emptyMap()).entrySet().stream()
+			final var headers = ofNullable(request.headers()).orElse(emptyMap()).entrySet().stream()
 				.map(this::createHeader)
 				.toList();
 			if (!headers.isEmpty()) {
@@ -74,16 +72,16 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 			}
 
 			// Request
-			var requestBody = createSendMailPostRequestBody();
+			final var requestBody = createSendMailPostRequestBody();
 			requestBody.setMessage(message);
 			requestBody.setSaveToSentItems(false);
 
 			// Send the e-mail
 			graphServiceClient.users()
-				.byUserId(sendAsId)
+				.byUserId(sender.address())
 				.sendMail()
 				.post(requestBody);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw Problem.builder()
 				.withStatus(Status.INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
@@ -100,7 +98,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 	}
 
 	ItemBody createItemBody(final SendEmailRequest request) {
-		var itemBody = new ItemBody();
+		final var itemBody = new ItemBody();
 
 		// Prioritize/use HTML, if it's set
 		if (isNotBlank(request.htmlMessage())) {
@@ -119,13 +117,13 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 	}
 
 	Recipient createRecipient(final String name, final String emailAddress) {
-		var address = new EmailAddress();
+		final var address = new EmailAddress();
 		address.setAddress(emailAddress);
 
 		// Set the name, if present
 		ofNullable(name).ifPresent(address::setName);
 
-		var recipient = new Recipient();
+		final var recipient = new Recipient();
 		recipient.setEmailAddress(address);
 		return recipient;
 	}
@@ -134,9 +132,9 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 		if (!BASE64_VALIDATOR.isValid(attachment.content())) {
 			return null;
 		}
-		var content = Base64.getDecoder().decode(attachment.content());
+		final var content = Base64.getDecoder().decode(attachment.content());
 
-		var fileAttachment = new FileAttachment();
+		final var fileAttachment = new FileAttachment();
 		fileAttachment.setName(attachment.name());
 		fileAttachment.setContentType(attachment.contentType());
 		fileAttachment.setContentBytes(content);
@@ -144,7 +142,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 	}
 
 	InternetMessageHeader createHeader(final Map.Entry<String, List<String>> headerEntry) {
-		var header = new InternetMessageHeader();
+		final var header = new InternetMessageHeader();
 		header.setName("X-" + Header.fromString(headerEntry.getKey()).getKey());
 		header.setValue(formatHeader(headerEntry.getValue()));
 		return header;

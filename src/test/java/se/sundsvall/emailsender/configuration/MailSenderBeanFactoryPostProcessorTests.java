@@ -37,12 +37,12 @@ class MailSenderBeanFactoryPostProcessorTests {
 
 		@Test
 		void creationAndAccessors() {
-			var properties = new Properties();
+			final var properties = new Properties();
 			properties.put("someKey", "someValue");
-			var basic = new MailSenderBeanFactoryPostProcessor.MailSenderProperties.Basic("someHost", 1234, "someUsername", "somePassword", properties);
-			var azure = new MailSenderBeanFactoryPostProcessor.MailSenderProperties.Azure("someSendAsId", "someTenantId", "someClientId", "someClientSecret", "someScope");
+			final var basic = new MailSenderBeanFactoryPostProcessor.MailSenderProperties.Basic("someHost", 1234, "someUsername", "somePassword", properties);
+			final var azure = new MailSenderBeanFactoryPostProcessor.MailSenderProperties.Azure("someTenantId", "someClientId", "someClientSecret", "someScope");
 
-			var smtpServerProperties = new MailSenderBeanFactoryPostProcessor.MailSenderProperties(basic, azure);
+			final var smtpServerProperties = new MailSenderBeanFactoryPostProcessor.MailSenderProperties(basic, azure);
 
 			assertThat(smtpServerProperties.basic()).isEqualTo(basic);
 			assertThat(smtpServerProperties.azure()).isEqualTo(azure);
