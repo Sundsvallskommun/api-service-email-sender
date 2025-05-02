@@ -50,8 +50,8 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 
 	@Override
 	public void afterPropertiesSet() {
-		var validationBindHandler = new ValidationBindHandler(new SpringValidatorAdapter(validator));
-		var binder = Binder.get(environment);
+		final var validationBindHandler = new ValidationBindHandler(new SpringValidatorAdapter(validator));
+		final var binder = Binder.get(environment);
 
 		// Bind/load (or create empty) default properties
 		defaultProperties = binder.bindOrCreate(DEFAULT_PROPERTIES, Bindable.of(Properties.class), validationBindHandler);
@@ -62,11 +62,11 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 
 	@Override
 	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		var beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
+		final var beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
 
 		mailSenderPropertiesByMunicipalityId.forEach((municipalityId, mailSenderProperties) -> {
-			var basicSet = nonNull(mailSenderProperties.basic);
-			var azureSet = nonNull(mailSenderProperties.azure);
+			final var basicSet = nonNull(mailSenderProperties.basic);
+			final var azureSet = nonNull(mailSenderProperties.azure);
 
 			// Make sure that exactly one of "basic" and "azure" is set, and validate the one that actually is
 			if ((!basicSet && !azureSet) || (basicSet && azureSet)) {
@@ -76,7 +76,7 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 
 				// Merge the default properties with the SMTP server properties, with
 				// values from the latter possibly overriding defaults
-				var mergedProperties = new Properties();
+				final var mergedProperties = new Properties();
 				mergedProperties.putAll(defaultProperties);
 				if (nonNull(mailSenderProperties.basic.properties)) {
 					mergedProperties.putAll(mailSenderProperties.basic.properties);
@@ -92,7 +92,7 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 	}
 
 	void registerSmtpMailSender(final BeanDefinitionRegistry beanDefinitionRegistry, final String municipalityId, final MailSenderProperties mailSenderProperties, final Properties mergedJavaMailProperties) {
-		var beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SmtpMailSender.class)
+		final var beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SmtpMailSender.class)
 			.addConstructorArgValue(createJavaMailSender(mailSenderProperties.basic, mergedJavaMailProperties))
 			.addPropertyValue("municipalityId", municipalityId)
 			.getBeanDefinition();
@@ -101,7 +101,7 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 	}
 
 	JavaMailSender createJavaMailSender(final MailSenderProperties.Basic basicMailSenderProperties, final Properties mergedJavaMailProperties) {
-		var javaMailSender = new NoOpOnUpdateMessageIdJavaMailSender();
+		final var javaMailSender = new NoOpOnUpdateMessageIdJavaMailSender();
 		javaMailSender.setHost(basicMailSenderProperties.host);
 		javaMailSender.setPort(basicMailSenderProperties.port);
 		ofNullable(basicMailSenderProperties.username).ifPresent(javaMailSender::setUsername);
@@ -111,9 +111,8 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 	}
 
 	void registerMicrosoftGraphMailSender(final BeanDefinitionRegistry beanDefinitionRegistry, final String municipalityId, final MailSenderProperties mailSenderProperties) {
-		var beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(MicrosoftGraphMailSender.class)
+		final var beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(MicrosoftGraphMailSender.class)
 			.addConstructorArgValue(createGraphServiceClient(mailSenderProperties.azure))
-			.addConstructorArgValue(mailSenderProperties.azure.sendAsId)
 			.addPropertyValue("municipalityId", municipalityId)
 			.getBeanDefinition();
 
@@ -121,7 +120,7 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 	}
 
 	GraphServiceClient createGraphServiceClient(final MailSenderProperties.Azure azureMailSenderProperties) {
-		var clientSecretCredential = new ClientSecretCredentialBuilder()
+		final var clientSecretCredential = new ClientSecretCredentialBuilder()
 			.tenantId(azureMailSenderProperties.tenantId)
 			.clientId(azureMailSenderProperties.clientId)
 			.clientSecret(azureMailSenderProperties.clientSecret)
@@ -140,10 +139,9 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 	}
 
 	/**
-	 * The default implementation of {@link JavaMailSenderImpl} generates a new
-	 * message-id before sending messages. Since this is an unwanted behaviour,
-	 * we are overriding the MimeMessage#updateMessageID method to cancel the
-	 * message-id generation.
+	 * The default implementation of {@link JavaMailSenderImpl} generates a new message-id before sending messages. Since
+	 * this is an unwanted behaviour, we are overriding the MimeMessage#updateMessageID method to cancel the message-id
+	 * generation.
 	 */
 	static class NoOpOnUpdateMessageIdJavaMailSender extends JavaMailSenderImpl {
 
@@ -178,13 +176,14 @@ class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ap
 			@DefaultValue("25") Integer port,
 			String username,
 			String password,
-			Properties properties) {}
+			Properties properties) {
+		}
 
 		record Azure(
-			@NotBlank(message = NOT_BLANK_MESSAGE) String sendAsId,
 			@NotBlank(message = NOT_BLANK_MESSAGE) String tenantId,
 			@NotBlank(message = NOT_BLANK_MESSAGE) String clientId,
 			@NotBlank(message = NOT_BLANK_MESSAGE) String clientSecret,
-			@DefaultValue("https://graph.microsoft.com/.default") String scope) {}
+			@DefaultValue("https://graph.microsoft.com/.default") String scope) {
+		}
 	}
 }

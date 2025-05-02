@@ -33,8 +33,6 @@ import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
 @ExtendWith(MockitoExtension.class)
 class MicrosoftGraphMailSenderTests {
 
-	private static final String SEND_AS_ID = "someSendAsId";
-
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private GraphServiceClient mockGraphServiceClient;
 
@@ -42,24 +40,24 @@ class MicrosoftGraphMailSenderTests {
 
 	@BeforeEach
 	void setUp() {
-		microsoftGraphMailSender = new MicrosoftGraphMailSender(mockGraphServiceClient, SEND_AS_ID);
+		microsoftGraphMailSender = new MicrosoftGraphMailSender(mockGraphServiceClient);
 	}
 
 	@Test
 	void sendEmail() {
-		var request = createValidSendEmailRequest();
+		final var request = createValidSendEmailRequest();
 
-		var microsoftGraphMailSenderSpy = spy(microsoftGraphMailSender);
-		var mockMessage = mock(Message.class);
+		final var microsoftGraphMailSenderSpy = spy(microsoftGraphMailSender);
+		final var mockMessage = mock(Message.class);
 		when(microsoftGraphMailSenderSpy.createMessage()).thenReturn(mockMessage);
-		var mockSendMailPostRequestBody = mock(SendMailPostRequestBody.class);
+		final var mockSendMailPostRequestBody = mock(SendMailPostRequestBody.class);
 		when(microsoftGraphMailSenderSpy.createSendMailPostRequestBody()).thenReturn(mockSendMailPostRequestBody);
 
-		var mockUsersRequestBuilder = mock(UsersRequestBuilder.class);
+		final var mockUsersRequestBuilder = mock(UsersRequestBuilder.class);
 		when(mockGraphServiceClient.users()).thenReturn(mockUsersRequestBuilder);
-		var mockUserItemRequestBuilder = mock(UserItemRequestBuilder.class);
-		when(mockUsersRequestBuilder.byUserId(SEND_AS_ID)).thenReturn(mockUserItemRequestBuilder);
-		var mockSendMailRequestBuilder = mock(SendMailRequestBuilder.class);
+		final var mockUserItemRequestBuilder = mock(UserItemRequestBuilder.class);
+		when(mockUsersRequestBuilder.byUserId(request.sender().address())).thenReturn(mockUserItemRequestBuilder);
+		final var mockSendMailRequestBuilder = mock(SendMailRequestBuilder.class);
 		when(mockUserItemRequestBuilder.sendMail()).thenReturn(mockSendMailRequestBuilder);
 
 		microsoftGraphMailSenderSpy.sendEmail(request);
@@ -89,7 +87,7 @@ class MicrosoftGraphMailSenderTests {
 		verify(mockSendMailPostRequestBody).setSaveToSentItems(false);
 
 		verify(mockGraphServiceClient).users();
-		verify(mockUsersRequestBuilder).byUserId(SEND_AS_ID);
+		verify(mockUsersRequestBuilder).byUserId(request.sender().address());
 		verify(mockUserItemRequestBuilder).sendMail();
 		verify(mockSendMailRequestBuilder).post(mockSendMailPostRequestBody);
 
@@ -98,11 +96,11 @@ class MicrosoftGraphMailSenderTests {
 
 	@Test
 	void createItemBodyWhenHtmlMessageIsSet() {
-		var request = SendEmailRequestBuilder.create()
+		final var request = SendEmailRequestBuilder.create()
 			.withHtmlMessage("c29tZUh0bWxNZXNzYWdl")
 			.build();
 
-		var itemBody = microsoftGraphMailSender.createItemBody(request);
+		final var itemBody = microsoftGraphMailSender.createItemBody(request);
 
 		assertThat(itemBody.getContentType()).isEqualTo(BodyType.Html);
 		assertThat(itemBody.getContent()).isEqualTo("someHtmlMessage");
@@ -110,11 +108,11 @@ class MicrosoftGraphMailSenderTests {
 
 	@Test
 	void createItemBodyWhenHtmlMessageIsNotSet() {
-		var request = SendEmailRequestBuilder.create()
+		final var request = SendEmailRequestBuilder.create()
 			.withMessage("someMessage")
 			.build();
 
-		var itemBody = microsoftGraphMailSender.createItemBody(request);
+		final var itemBody = microsoftGraphMailSender.createItemBody(request);
 
 		assertThat(itemBody.getContentType()).isEqualTo(BodyType.Text);
 		assertThat(itemBody.getContent()).isEqualTo("someMessage");
@@ -122,9 +120,9 @@ class MicrosoftGraphMailSenderTests {
 
 	@Test
 	void createRecipientWithEmailAddressOnly() {
-		var emailAddress = "someEmailAddress";
+		final var emailAddress = "someEmailAddress";
 
-		var recipient = microsoftGraphMailSender.createRecipient(emailAddress);
+		final var recipient = microsoftGraphMailSender.createRecipient(emailAddress);
 
 		assertThat(recipient.getEmailAddress()).satisfies(recipientEmailAddress -> {
 			assertThat(recipientEmailAddress.getAddress()).isEqualTo(emailAddress);
@@ -134,10 +132,10 @@ class MicrosoftGraphMailSenderTests {
 
 	@Test
 	void createRecipientWithNameAndEmailAddress() {
-		var name = "someName";
-		var emailAddress = "someEmailAddress";
+		final var name = "someName";
+		final var emailAddress = "someEmailAddress";
 
-		var recipient = microsoftGraphMailSender.createRecipient(name, emailAddress);
+		final var recipient = microsoftGraphMailSender.createRecipient(name, emailAddress);
 
 		assertThat(recipient.getEmailAddress()).satisfies(recipientEmailAddress -> {
 			assertThat(recipientEmailAddress.getAddress()).isEqualTo(emailAddress);
@@ -147,11 +145,11 @@ class MicrosoftGraphMailSenderTests {
 
 	@Test
 	void createHeader() {
-		var name = Header.MESSAGE_ID.getKey();
-		var value = "someHeaderValue";
-		var entry = new AbstractMap.SimpleEntry<>(name, List.of(value));
+		final var name = Header.MESSAGE_ID.getKey();
+		final var value = "someHeaderValue";
+		final var entry = new AbstractMap.SimpleEntry<>(name, List.of(value));
 
-		var header = microsoftGraphMailSender.createHeader(entry);
+		final var header = microsoftGraphMailSender.createHeader(entry);
 
 		assertThat(header.getName()).isEqualTo("X-" + name);
 		assertThat(header.getValue()).isEqualTo(value);
