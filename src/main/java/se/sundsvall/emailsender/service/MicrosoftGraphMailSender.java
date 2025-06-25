@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 import com.microsoft.graph.models.Attachment;
 import com.microsoft.graph.models.BodyType;
@@ -21,12 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 public class MicrosoftGraphMailSender extends AbstractMailSender {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MicrosoftGraphMailSender.class);
 
 	private final GraphServiceClient graphServiceClient;
 
@@ -36,6 +40,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 
 	@Override
 	public void sendEmail(final SendEmailRequest request) {
+		LOGGER.info("Sending email to: {}", request.emailAddress());
 		try {
 			final var sender = request.sender();
 
@@ -76,14 +81,14 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 			requestBody.setMessage(message);
 			requestBody.setSaveToSentItems(false);
 
-			// Send the e-mail
 			graphServiceClient.users()
 				.byUserId(sender.address())
 				.sendMail()
 				.post(requestBody);
 		} catch (final Exception e) {
+			LOGGER.error("Error sending email to: {}", request.emailAddress(), e);
 			throw Problem.builder()
-				.withStatus(Status.INTERNAL_SERVER_ERROR)
+				.withStatus(INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
 				.build();
 		}
