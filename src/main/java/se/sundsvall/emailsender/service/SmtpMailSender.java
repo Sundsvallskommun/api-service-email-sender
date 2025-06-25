@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.function.Failable.stream;
 import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
+import static se.sundsvall.emailsender.support.ProblemUtils.getProblemCause;
 
 import jakarta.activation.DataHandler;
 import jakarta.mail.BodyPart;
@@ -48,6 +49,7 @@ public class SmtpMailSender extends AbstractMailSender {
 			throw Problem.builder()
 				.withStatus(Status.INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
+				.withCause(getProblemCause(e))
 				.build();
 		}
 	}
