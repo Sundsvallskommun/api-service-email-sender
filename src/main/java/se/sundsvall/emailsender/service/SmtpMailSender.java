@@ -24,6 +24,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
@@ -31,6 +33,8 @@ import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 public class SmtpMailSender extends AbstractMailSender {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SmtpMailSender.class);
 
 	private final JavaMailSender javaMailSender;
 
@@ -45,6 +49,7 @@ public class SmtpMailSender extends AbstractMailSender {
 
 			javaMailSender.send(mimeMessage);
 		} catch (MessagingException e) {
+			LOGGER.error("Error while sending email to: {}", request.emailAddress(), e);
 			throw Problem.builder()
 				.withStatus(Status.INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
