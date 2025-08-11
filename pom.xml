@@ -14,7 +14,7 @@
 	<properties>
 		<jilt.version>1.8.3</jilt.version>
 		<faux-pas.version>0.9.0</faux-pas.version>
-		<microsoft-graph.version>6.48.0</microsoft-graph.version>
+		<microsoft-graph.version>6.49.0</microsoft-graph.version>
 		<azure-identity.version>1.16.3</azure-identity.version>
 	</properties>
 	<dependencies>
