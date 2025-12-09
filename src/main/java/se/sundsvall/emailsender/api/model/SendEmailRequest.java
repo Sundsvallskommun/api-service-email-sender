@@ -16,7 +16,7 @@ import se.sundsvall.emailsender.api.validation.ValidHeaders;
 @Schema(description = "The request class for sending an e-mail")
 public record SendEmailRequest(
 
-	@NotBlank @Email @Schema(description = "Recipient e-mail address", example = "recipient@recipient.se") String emailAddress,
+	@NotBlank @Email @Schema(description = "Recipient e-mail address", examples = "recipient@recipient.se") String emailAddress,
 
 	@NotBlank @Schema(description = "E-mail subject") String subject,
 
@@ -34,11 +34,11 @@ public record SendEmailRequest(
 	@Schema(description = "Attachment")
 	public record Attachment(
 
-		@ValidBase64 @Schema(description = "The attachment (file) content as a BASE64-encoded string", example = "aGVsbG8gd29ybGQK") String content,
+		@ValidBase64 @Schema(description = "The attachment (file) content as a BASE64-encoded string", examples = "aGVsbG8gd29ybGQK") String content,
 
-		@NotBlank @Schema(description = "The attachment filename", example = "test.txt") String name,
+		@NotBlank @Schema(description = "The attachment filename", examples = "test.txt") String name,
 
-		@NotBlank @Schema(description = "The attachment content type", example = "text/plain") String contentType) {}
+		@NotBlank @Schema(description = "The attachment content type", examples = "text/plain") String contentType) {}
 
 	@Builder(setterPrefix = "with", factoryMethod = "create", toBuilder = "from")
 	@Schema(description = "E-mail sender")
@@ -46,7 +46,7 @@ public record SendEmailRequest(
 
 		@NotBlank @Schema(description = "The sender of the e-mail") String name,
 
-		@Email @NotBlank @Schema(description = "Sender e-mail address", example = "sender@sender.se") String address,
+		@Email @NotBlank @Schema(description = "Sender e-mail address", examples = "sender@sender.se") String address,
 
-		@Email @Schema(description = "Reply-to e-mail address", example = "sender@sender.se") String replyTo) {}
+		@Email @Schema(description = "Reply-to e-mail address", examples = "sender@sender.se") String replyTo) {}
 }
