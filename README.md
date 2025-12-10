@@ -6,7 +6,7 @@ _A service in the messaging ecosystem whic purpose is to send emails. Has the ca
 
 ### Prerequisites
 
-- **Java 21 or higher**
+- **Java 25 or higher**
 - **Maven**
 - **Git**
 - **[Dependent Microservices](#dependencies)**
