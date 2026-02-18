@@ -1,11 +1,11 @@
 package se.sundsvall.emailsender.service;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import se.sundsvall.dept44.common.validators.annotation.impl.ValidBase64ConstraintValidator;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class AbstractMailSender implements MailSender {
 

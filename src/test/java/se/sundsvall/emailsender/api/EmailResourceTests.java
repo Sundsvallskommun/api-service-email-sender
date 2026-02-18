@@ -1,10 +1,5 @@
 package se.sundsvall.emailsender.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -16,6 +11,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import se.sundsvall.emailsender.Application;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.service.EmailService;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")

@@ -1,12 +1,5 @@
 package se.sundsvall.emailsender.service;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.function.Failable.stream;
-import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
-import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
-import static org.zalando.fauxpas.FauxPas.throwingFunction;
-
 import jakarta.activation.DataHandler;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
@@ -31,6 +24,13 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.function.Failable.stream;
+import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
+import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 public class SmtpMailSender extends AbstractMailSender {
 

@@ -1,10 +1,10 @@
 package se.sundsvall.emailsender.api.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("junit")
 class SendEmailRequestTests {

@@ -1,10 +1,10 @@
 package se.sundsvall.emailsender.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MailSenderTests {
 

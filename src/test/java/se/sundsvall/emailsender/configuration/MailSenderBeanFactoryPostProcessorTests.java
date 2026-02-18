@@ -1,7 +1,5 @@
 package se.sundsvall.emailsender.configuration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Nested;
@@ -11,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import se.sundsvall.emailsender.Application;
 import se.sundsvall.emailsender.service.MailSender;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("junit")
 @SpringBootTest(classes = Application.class)

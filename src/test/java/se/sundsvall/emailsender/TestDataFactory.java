@@ -1,10 +1,5 @@
 package se.sundsvall.emailsender;
 
-import static se.sundsvall.emailsender.api.model.Header.AUTO_SUBMITTED;
-import static se.sundsvall.emailsender.api.model.Header.IN_REPLY_TO;
-import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
-import static se.sundsvall.emailsender.api.model.Header.REFERENCES;
-
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +7,11 @@ import se.sundsvall.emailsender.api.model.AttachmentBuilder;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
 import se.sundsvall.emailsender.api.model.SenderBuilder;
+
+import static se.sundsvall.emailsender.api.model.Header.AUTO_SUBMITTED;
+import static se.sundsvall.emailsender.api.model.Header.IN_REPLY_TO;
+import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
+import static se.sundsvall.emailsender.api.model.Header.REFERENCES;
 
 public final class TestDataFactory {
 

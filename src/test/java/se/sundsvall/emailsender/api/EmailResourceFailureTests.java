@@ -1,14 +1,5 @@
 package se.sundsvall.emailsender.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.zalando.problem.Status.BAD_REQUEST;
-import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
-import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -28,6 +19,15 @@ import se.sundsvall.emailsender.Application;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
 import se.sundsvall.emailsender.service.EmailService;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.zalando.problem.Status.BAD_REQUEST;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
+import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 
 @SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("junit")
