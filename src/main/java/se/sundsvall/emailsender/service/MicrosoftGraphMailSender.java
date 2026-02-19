@@ -1,12 +1,5 @@
 package se.sundsvall.emailsender.service;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
-
 import com.microsoft.graph.models.Attachment;
 import com.microsoft.graph.models.BodyType;
 import com.microsoft.graph.models.EmailAddress;
@@ -27,6 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 public class MicrosoftGraphMailSender extends AbstractMailSender {
 

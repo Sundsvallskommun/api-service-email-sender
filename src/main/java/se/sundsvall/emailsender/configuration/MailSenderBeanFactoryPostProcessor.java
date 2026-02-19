@@ -1,8 +1,5 @@
 package se.sundsvall.emailsender.configuration;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.graph.serviceclient.GraphServiceClient;
 import jakarta.mail.Session;
@@ -33,6 +30,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import se.sundsvall.emailsender.service.MicrosoftGraphMailSender;
 import se.sundsvall.emailsender.service.SmtpMailSender;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 @Component
 class MailSenderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, ApplicationContextAware, InitializingBean {

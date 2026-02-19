@@ -1,17 +1,5 @@
 package se.sundsvall.emailsender.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
-
 import com.microsoft.graph.models.BodyType;
 import com.microsoft.graph.models.Message;
 import com.microsoft.graph.serviceclient.GraphServiceClient;
@@ -29,6 +17,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 
 @ExtendWith(MockitoExtension.class)
 class MicrosoftGraphMailSenderTests {

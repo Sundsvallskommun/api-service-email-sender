@@ -1,7 +1,5 @@
 package se.sundsvall.emailsender.api;
 
-import static org.springframework.http.ResponseEntity.ok;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +18,8 @@ import org.zalando.problem.violations.ConstraintViolationProblem;
 import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.service.EmailService;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @Tag(name = "Email resources", description = "Resources for sending emails")
