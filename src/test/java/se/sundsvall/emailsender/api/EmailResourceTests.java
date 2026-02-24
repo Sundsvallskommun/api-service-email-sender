@@ -1,10 +1,13 @@
 package se.sundsvall.emailsender.api;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -19,6 +22,8 @@ import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailReque
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("junit")
+@ExtendWith(MockitoExtension.class)
+@AutoConfigureWebTestClient
 class EmailResourceTests {
 
 	private static final String MUNICIPALITY_ID = "2281";
