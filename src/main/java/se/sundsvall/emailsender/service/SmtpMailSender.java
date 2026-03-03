@@ -20,14 +20,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.emailsender.api.model.Header;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.function.Failable.stream;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.util.MimeTypeUtils.TEXT_HTML;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
@@ -51,7 +51,7 @@ public class SmtpMailSender extends AbstractMailSender {
 		} catch (MessagingException e) {
 			LOGGER.error("Error while sending email to: {}", request.emailAddress(), e);
 			throw Problem.builder()
-				.withStatus(Status.INTERNAL_SERVER_ERROR)
+				.withStatus(INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
 				.build();
 		}

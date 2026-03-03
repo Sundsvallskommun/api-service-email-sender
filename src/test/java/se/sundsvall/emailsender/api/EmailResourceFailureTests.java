@@ -5,16 +5,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.zalando.problem.violations.ConstraintViolationProblem;
-import org.zalando.problem.violations.Violation;
+import se.sundsvall.dept44.problem.violations.ConstraintViolationProblem;
+import se.sundsvall.dept44.problem.violations.Violation;
 import se.sundsvall.emailsender.Application;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 import se.sundsvall.emailsender.api.model.SendEmailRequestBuilder;
@@ -24,13 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.zalando.problem.Status.BAD_REQUEST;
 import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
 import static se.sundsvall.emailsender.api.model.Header.MESSAGE_ID;
 
 @SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("junit")
+@ExtendWith(MockitoExtension.class)
+@AutoConfigureWebTestClient
 class EmailResourceFailureTests {
 
 	private static final String MUNICIPALITY_ID = "2281";
@@ -58,7 +63,7 @@ class EmailResourceFailureTests {
 		assertThat(response).isNotNull().satisfies(r -> {
 			assertThat(r.getTitle()).isEqualTo("Constraint Violation");
 			assertThat(r.getStatus()).isEqualTo(BAD_REQUEST);
-			assertThat(r.getViolations()).extracting(Violation::getField, Violation::getMessage)
+			assertThat(r.getViolations()).extracting(Violation::field, Violation::message)
 				.containsExactlyInAnyOrder(tuple(badArgument, expectedMessage));
 		});
 	}
@@ -89,7 +94,7 @@ class EmailResourceFailureTests {
 		assertThat(response).isNotNull().satisfies(r -> {
 			assertThat(r.getTitle()).isEqualTo("Constraint Violation");
 			assertThat(r.getStatus()).isEqualTo(BAD_REQUEST);
-			assertThat(r.getViolations()).extracting(Violation::getField, Violation::getMessage)
+			assertThat(r.getViolations()).extracting(Violation::field, Violation::message)
 				.containsExactlyInAnyOrder(tuple("headers.Message-ID", "must start with '<', contain '@' and end with '>'"));
 		});
 
@@ -112,7 +117,7 @@ class EmailResourceFailureTests {
 		assertThat(response.getTitle()).isEqualTo("Constraint Violation");
 		assertThat(response.getStatus()).isEqualTo(BAD_REQUEST);
 		assertThat(response.getViolations())
-			.extracting(Violation::getField, Violation::getMessage)
+			.extracting(Violation::field, Violation::message)
 			.containsExactly(Tuple.tuple("sendMail.municipalityId", "not a valid municipality ID"));
 	}
 }

@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.emailsender.api.model.SendEmailRequest;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
+import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 
 @Service
 public class EmailService {
@@ -24,7 +24,7 @@ public class EmailService {
 	public void sendMail(final String municipalityId, final SendEmailRequest request) {
 		var mailSender = mailSenders.get(municipalityId);
 		if (isNull(mailSender)) {
-			throw Problem.valueOf(Status.BAD_GATEWAY, "No mail sender exists for municipalityId " + municipalityId);
+			throw Problem.valueOf(BAD_GATEWAY, "No mail sender exists for municipalityId " + municipalityId);
 		}
 
 		mailSender.sendEmail(request);
