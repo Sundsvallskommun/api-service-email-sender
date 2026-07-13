@@ -4,7 +4,9 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -22,6 +24,7 @@ import se.sundsvall.emailsender.Application;
 
 @Testcontainers
 @ExtendWith(ResourceLoaderExtension.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 @WireMockAppTestSuite(files = "classpath:/EmailIT/", classes = Application.class)
 class EmailIT extends AbstractAppTest {
 
@@ -74,5 +77,31 @@ class EmailIT extends AbstractAppTest {
 			.jsonPath("$.messages[0].ReplyTo[0].Name").isEmpty()
 			.jsonPath("$.messages[0].ReplyTo[0].Address").isEqualTo(jsonPath.read("$.sender.replyTo"))
 			.jsonPath("$.messages[0].Attachments").isEqualTo(jsonPath.read("$.attachments.length()"));
+	}
+
+	@Test
+	void test2_successfulRequestWithRecipientsAndCc(@Load("/EmailIT/__files/test2_successfulRequestWithRecipientsAndCc/request.json") final String request) {
+		setupCall()
+			.withServicePath(SERVICE_PATH)
+			.withHttpMethod(POST)
+			.withRequest(REQUEST_FILE)
+			.withExpectedResponseStatus(OK)
+			.sendRequestAndVerifyResponse();
+
+		// Verify what was actually sent
+		var jsonPath = JsonPath.parse(request);
+
+		// Mailpit returns messages newest-first and its state is shared across tests, so assert on the newest ([0])
+		webTestClient.get()
+			.uri("/messages")
+			.exchange()
+			.expectBody()
+			.jsonPath("$.messages[0].Subject").isEqualTo(jsonPath.read("$.subject"))
+			.jsonPath("$.messages[0].To.length()").isEqualTo(2)
+			.jsonPath("$.messages[0].To[0].Address").isEqualTo(jsonPath.read("$.recipients[0]"))
+			.jsonPath("$.messages[0].To[1].Address").isEqualTo(jsonPath.read("$.recipients[1]"))
+			.jsonPath("$.messages[0].Cc.length()").isEqualTo(2)
+			.jsonPath("$.messages[0].Cc[0].Address").isEqualTo(jsonPath.read("$.cc[0]"))
+			.jsonPath("$.messages[0].Cc[1].Address").isEqualTo(jsonPath.read("$.cc[1]"));
 	}
 }

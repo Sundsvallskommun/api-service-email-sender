@@ -66,10 +66,17 @@ class SendEmailRequestValidationTests {
 		var validEmailRequest = createValidSendEmailRequest();
 
 		return Stream.of(
-			// Validate recipient email address.
-			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress(null).build(), "emailAddress", "must not be blank"),
-			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress("").build(), "emailAddress", "must not be blank"),
+			// Validate deprecated recipient email address format.
 			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress("kalle").build(), "emailAddress", "must be a well-formed email address"),
+
+			// Validate that at least one recipient is provided (neither emailAddress nor recipients).
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress(null).withRecipients(null).build(), "", "at least one recipient must be provided in 'emailAddress' or 'recipients'"),
+
+			// Validate recipients (To) list element email address format.
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withEmailAddress(null).withRecipients(List.of("kalle")).build(), "recipients[0].<list element>", "must be a well-formed email address"),
+
+			// Validate cc list element email address format.
+			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest).withCc(List.of("kalle")).build(), "cc[0].<list element>", "must be a well-formed email address"),
 
 			// Validate sender email address.
 			Arguments.of(SendEmailRequestBuilder.from(validEmailRequest)

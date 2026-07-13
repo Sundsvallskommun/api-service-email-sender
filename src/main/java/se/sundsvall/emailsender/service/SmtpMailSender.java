@@ -49,7 +49,7 @@ public class SmtpMailSender extends AbstractMailSender {
 
 			javaMailSender.send(mimeMessage);
 		} catch (MessagingException e) {
-			LOGGER.error("Error while sending email to: {}", request.emailAddress(), e);
+			LOGGER.error("Error while sending email to: {}", request.allRecipients(), e);
 			throw Problem.builder()
 				.withStatus(INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
@@ -71,8 +71,14 @@ public class SmtpMailSender extends AbstractMailSender {
 			.orElseGet(sender::address);
 		message.setReplyTo(InternetAddress.parse(replyTo));
 
-		// Handle recipient
-		message.setRecipients(Message.RecipientType.TO, request.emailAddress());
+		// Handle recipients (TO)
+		message.setRecipients(Message.RecipientType.TO, toInternetAddresses(request.allRecipients()));
+
+		// Handle carbon-copy recipients (CC)
+		var ccRecipients = request.allCc();
+		if (!ccRecipients.isEmpty()) {
+			message.setRecipients(Message.RecipientType.CC, toInternetAddresses(ccRecipients));
+		}
 
 		// Handle subject
 		message.setSubject(request.subject(), UTF_8.name());
@@ -87,6 +93,10 @@ public class SmtpMailSender extends AbstractMailSender {
 				formatHeader(header.getValue())));
 
 		return message;
+	}
+
+	InternetAddress[] toInternetAddresses(final List<String> addresses) throws MessagingException {
+		return InternetAddress.parse(String.join(",", addresses));
 	}
 
 	String encode(final String s) throws MessagingException {
