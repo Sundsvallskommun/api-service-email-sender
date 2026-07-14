@@ -40,7 +40,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 
 	@Override
 	public void sendEmail(final SendEmailRequest request) {
-		LOGGER.info("Sending email to: {}", request.allRecipients());
+		LOGGER.info("Sending email to {} recipient(s)", request.allRecipients().size());
 		try {
 			final var sender = request.sender();
 
@@ -96,7 +96,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 				.sendMail()
 				.post(requestBody);
 		} catch (final Exception e) {
-			LOGGER.error("Error sending email to: {}", request.allRecipients(), e);
+			LOGGER.error("Error sending email to {} recipient(s)", request.allRecipients().size(), e);
 			throw Problem.builder()
 				.withStatus(INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")

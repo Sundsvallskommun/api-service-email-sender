@@ -49,7 +49,7 @@ public class SmtpMailSender extends AbstractMailSender {
 
 			javaMailSender.send(mimeMessage);
 		} catch (MessagingException e) {
-			LOGGER.error("Error while sending email to: {}", request.allRecipients(), e);
+			LOGGER.error("Error while sending email to {} recipient(s)", request.allRecipients().size(), e);
 			throw Problem.builder()
 				.withStatus(INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
