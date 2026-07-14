@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequestWithRecipientsAndCc;
 
 @ExtendWith(MockitoExtension.class)
 class SmtpMailSenderTests {
@@ -49,7 +50,7 @@ class SmtpMailSenderTests {
 		verifyNoMoreInteractions(mockJavaMailSender);
 		verify(mockMimeMessage).setFrom(any(String.class));
 		verify(mockMimeMessage).setReplyTo(any(Address[].class));
-		verify(mockMimeMessage).setRecipients(eq(Message.RecipientType.TO), any(String.class));
+		verify(mockMimeMessage).setRecipients(eq(Message.RecipientType.TO), any(Address[].class));
 		verify(mockMimeMessage).setSubject(any(String.class), any(String.class));
 		verify(mockMimeMessage).setContent(any(Multipart.class));
 		verify(mockMimeMessage).addHeader("Message-ID", "<318d3a5c-cd45-45ef-94a0-0e3a88e47bf6@sundsvall.se>");
@@ -57,6 +58,19 @@ class SmtpMailSenderTests {
 		verify(mockMimeMessage).addHeader("In-Reply-To", "<5e0b2ce9-9b0c-4f8b-aa62-ebac666c5b64@sundsvall.se>");
 		verify(mockMimeMessage).addHeader("Auto-Submitted", "auto-generated");
 		verifyNoMoreInteractions(mockMimeMessage);
+	}
+
+	@Test
+	void sendEmail_withRecipientsAndCc() throws MessagingException {
+		var request = createValidSendEmailRequestWithRecipientsAndCc();
+
+		when(mockJavaMailSender.createMimeMessage()).thenReturn(mockMimeMessage);
+
+		smtpMailSender.sendEmail(request);
+
+		verify(mockJavaMailSender).send(mockMimeMessage);
+		verify(mockMimeMessage).setRecipients(eq(Message.RecipientType.TO), any(Address[].class));
+		verify(mockMimeMessage).setRecipients(eq(Message.RecipientType.CC), any(Address[].class));
 	}
 
 	@Test

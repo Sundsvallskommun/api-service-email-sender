@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequest;
+import static se.sundsvall.emailsender.TestDataFactory.createValidSendEmailRequestWithRecipientsAndCc;
 
 @ExtendWith(MockitoExtension.class)
 class MicrosoftGraphMailSenderTests {
@@ -92,6 +93,29 @@ class MicrosoftGraphMailSenderTests {
 		verify(mockSendMailRequestBuilder).post(mockSendMailPostRequestBody);
 
 		verifyNoMoreInteractions(microsoftGraphMailSenderSpy, mockMessage, mockSendMailPostRequestBody, mockGraphServiceClient, mockUsersRequestBuilder, mockUserItemRequestBuilder, mockSendMailRequestBuilder);
+	}
+
+	@Test
+	void sendEmailWithRecipientsAndCc() {
+		final var request = createValidSendEmailRequestWithRecipientsAndCc();
+
+		final var microsoftGraphMailSenderSpy = spy(microsoftGraphMailSender);
+		final var mockMessage = mock(Message.class);
+		when(microsoftGraphMailSenderSpy.createMessage()).thenReturn(mockMessage);
+		final var mockSendMailPostRequestBody = mock(SendMailPostRequestBody.class);
+		when(microsoftGraphMailSenderSpy.createSendMailPostRequestBody()).thenReturn(mockSendMailPostRequestBody);
+
+		final var mockUsersRequestBuilder = mock(UsersRequestBuilder.class);
+		when(mockGraphServiceClient.users()).thenReturn(mockUsersRequestBuilder);
+		final var mockUserItemRequestBuilder = mock(UserItemRequestBuilder.class);
+		when(mockUsersRequestBuilder.byUserId(request.sender().address())).thenReturn(mockUserItemRequestBuilder);
+		final var mockSendMailRequestBuilder = mock(SendMailRequestBuilder.class);
+		when(mockUserItemRequestBuilder.sendMail()).thenReturn(mockSendMailRequestBuilder);
+
+		microsoftGraphMailSenderSpy.sendEmail(request);
+
+		verify(mockMessage).setToRecipients(anyList());
+		verify(mockMessage).setCcRecipients(anyList());
 	}
 
 	@Test

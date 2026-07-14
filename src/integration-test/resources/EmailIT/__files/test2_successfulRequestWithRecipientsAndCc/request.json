@@ -1,0 +1,30 @@
+{
+	"headers": {
+		"Message-ID": [
+			"<0d151193@113c2234d334>"
+		]
+	},
+	"recipients": [
+		"recipient1@somehost.com",
+		"recipient2@somehost.com"
+	],
+	"cc": [
+		"cc1@somehost.com",
+		"cc2@somehost.com"
+	],
+	"attachments": [
+		{
+			"name": "myattachment.txt",
+			"contentType": "text/plain",
+			"content": "dGhpcyBpcyBhbiBhdHRhY2htZW50"
+		}
+	],
+	"sender": {
+		"address": "customerservice@somedummyhost.com",
+		"name": "Customer Service",
+		"replyTo": "noreply@somedummyhost.com"
+	},
+	"subject": "Order confirmation",
+	"htmlMessage": "TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQ=",
+	"message": "Lorem ipsum dolor sit amet"
+}

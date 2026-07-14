@@ -45,6 +45,14 @@ public final class TestDataFactory {
 			.build();
 	}
 
+	public static SendEmailRequest createValidSendEmailRequestWithRecipientsAndCc() {
+		return SendEmailRequestBuilder.from(createValidSendEmailRequest())
+			.withEmailAddress(null)
+			.withRecipients(List.of("receiver1@receiver.com", "receiver2@receiver.com"))
+			.withCc(List.of("cc1@receiver.com", "cc2@receiver.com"))
+			.build();
+	}
+
 	public static SendEmailRequest.Sender createValidSender() {
 		return SenderBuilder.create()
 			.withName("Sundsvalls Kommun")

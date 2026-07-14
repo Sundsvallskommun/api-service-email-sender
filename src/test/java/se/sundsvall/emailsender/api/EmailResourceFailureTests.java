@@ -102,6 +102,32 @@ class EmailResourceFailureTests {
 	}
 
 	@Test
+	void sendMailWithNoRecipients() {
+		var request = SendEmailRequestBuilder.from(createValidSendEmailRequest())
+			.withEmailAddress(null)
+			.withRecipients(null)
+			.build();
+
+		var response = webTestClient.post()
+			.uri(builder -> builder.path(PATH).build())
+			.bodyValue(request)
+			.exchange()
+			.expectStatus().isBadRequest()
+			.expectBody(ConstraintViolationProblem.class)
+			.returnResult()
+			.getResponseBody();
+
+		assertThat(response).isNotNull().satisfies(r -> {
+			assertThat(r.getTitle()).isEqualTo("Constraint Violation");
+			assertThat(r.getStatus()).isEqualTo(BAD_REQUEST);
+			assertThat(r.getViolations()).extracting(Violation::message)
+				.contains("at least one recipient must be provided in 'emailAddress' or 'recipients'");
+		});
+
+		verifyNoInteractions(mockEmailService);
+	}
+
+	@Test
 	void sendMailWithFaultyMunicipalityId() {
 		var request = createValidSendEmailRequest();
 
