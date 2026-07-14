@@ -40,7 +40,8 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 
 	@Override
 	public void sendEmail(final SendEmailRequest request) {
-		LOGGER.info("Sending email to {} recipient(s)", request.allRecipients().size());
+		final var recipients = request.allRecipients();
+		LOGGER.info("Sending email to {} recipient(s)", recipients.size());
 		try {
 			final var sender = request.sender();
 
@@ -51,7 +52,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 			message.setBody(createItemBody(request));
 
 			// Recipients (TO)
-			message.setToRecipients(request.allRecipients().stream()
+			message.setToRecipients(recipients.stream()
 				.map(this::createRecipient)
 				.toList());
 
@@ -96,7 +97,7 @@ public class MicrosoftGraphMailSender extends AbstractMailSender {
 				.sendMail()
 				.post(requestBody);
 		} catch (final Exception e) {
-			LOGGER.error("Error sending email to {} recipient(s)", request.allRecipients().size(), e);
+			LOGGER.error("Error sending email to {} recipient(s)", recipients.size(), e);
 			throw Problem.builder()
 				.withStatus(INTERNAL_SERVER_ERROR)
 				.withDetail("Unable to send e-mail")
