@@ -1,8 +1,5 @@
 package apptest;
 
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.OK;
-
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -21,6 +18,9 @@ import se.sundsvall.dept44.test.annotation.resource.Load;
 import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.dept44.test.extension.ResourceLoaderExtension;
 import se.sundsvall.emailsender.Application;
+
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.OK;
 
 @Testcontainers
 @ExtendWith(ResourceLoaderExtension.class)
